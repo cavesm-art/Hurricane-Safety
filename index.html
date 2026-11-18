@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hurricane Safety · Dangerous Earth Unit 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --paper:#EDF2F5; --paper-2:#E2EAF0; --panel:#FFFFFF; --ink:#0E2433; --ink-2:#3D5567; --ink-3:#6C8394;
+  --rule:#BCCDD9; --rule-2:#D5E1E9; --accent:#0B6E99; --accent-ink:#FFFFFF; --accent-soft:#D4E9F3;
+  --warn:#C62828; --warn-soft:#FBE3E1; --watch:#C77700; --watch-soft:#FFF0D6; --good:#1F7A4D; --good-soft:#DDF1E5;
+  --ocean:#CFE2EE; --ocean-2:#B9D4E5; --land:#E8E3D4; --coast:#6E8290; --grid:rgba(14,36,51,.16);
+  --td:#6FA8DC; --ts:#2DB5B5; --c1:#F2D04B; --c2:#F5A623; --c3:#EE6C2B; --c4:#D83A3A; --c5:#B2228F;
+  --shadow:0 1px 2px rgba(14,36,51,.08),0 8px 24px -12px rgba(14,36,51,.25);
+  --r-lg:18px; --r-md:12px; --r-sm:8px;
+  --font:"Archivo",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#07131C; --paper-2:#0B1B27; --panel:#0F2230; --ink:#E5EEF4; --ink-2:#A3B8C6; --ink-3:#7890A0;
+    --rule:#24404F; --rule-2:#1A3141; --accent:#5CC8F0; --accent-ink:#04202E; --accent-soft:#123447;
+    --warn:#FF6B5E; --warn-soft:#3A1715; --watch:#FFB547; --watch-soft:#3A2A10; --good:#5BD497; --good-soft:#12321F;
+    --ocean:#0B2538; --ocean-2:#0E2D44; --land:#1E2E37; --coast:#6A8394; --grid:rgba(160,200,225,.14);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -12px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#07131C; --paper-2:#0B1B27; --panel:#0F2230; --ink:#E5EEF4; --ink-2:#A3B8C6; --ink-3:#7890A0;
+  --rule:#24404F; --rule-2:#1A3141; --accent:#5CC8F0; --accent-ink:#04202E; --accent-soft:#123447;
+  --warn:#FF6B5E; --warn-soft:#3A1715; --watch:#FFB547; --watch-soft:#3A2A10; --good:#5BD497; --good-soft:#12321F;
+  --ocean:#0B2538; --ocean-2:#0E2D44; --land:#1E2E37; --coast:#6A8394; --grid:rgba(160,200,225,.14);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -12px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:17.5px;line-height:1.62;font-variation-settings:"wdth" 100;-webkit-font-smoothing:antialiased}
+img,svg,canvas{max-width:100%}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- top bar ---------- */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:40;padding-top:env(safe-area-inset-top,0px);background:color-mix(in srgb,var(--paper) 82%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--rule-2);transform:translateY(-110%);transition:transform .35s ease}
+.topbar.show{transform:none}
+.topbar .in{display:flex;align-items:center;gap:14px;max-width:1240px;margin:0 auto;padding:10px 20px}
+.topbar .brand{font-weight:800;font-variation-settings:"wdth" 118;font-size:15px;white-space:nowrap}
+.topbar .where{color:var(--ink-3);font-size:14px;font-variation-settings:"wdth" 80;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .sp{flex:1}
+.theme-btn{white-space:nowrap;border:1px solid var(--rule);background:var(--panel);border-radius:999px;padding:5px 12px;font-size:13.5px;cursor:pointer;font-variation-settings:"wdth" 85}
+.progress-line{height:3px;background:linear-gradient(90deg,var(--td),var(--ts),var(--c1),var(--c2),var(--c3),var(--c4),var(--c5));transform-origin:left;transform:scaleX(0)}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:min(100vh,880px);display:grid;align-items:end;overflow:hidden;background:#02070C;color:#EAF3F8;isolation:isolate}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(2,7,12,0) 35%,rgba(2,7,12,.75) 80%,rgba(2,7,12,.95))}
+.hero .in{max-width:1240px;width:100%;margin:0 auto;padding:120px 24px 56px}
+.hero .unit{font-variation-settings:"wdth" 80;font-size:16px;color:#9CC2D6;margin:0 0 10px}
+.hero h1{margin:0;font-weight:850;font-variation-settings:"wdth" 125;font-size:clamp(46px,9.2vw,128px);line-height:.88;letter-spacing:-.02em;max-width:11ch}
+.hero .dq{margin:26px 0 0;font-size:clamp(20px,2.6vw,30px);line-height:1.25;font-weight:500;max-width:30ch;font-variation-settings:"wdth" 92}
+.hero .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:28px}
+.std-chip{font-size:13px;padding:3px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.3);color:#CFE4EF;font-variation-settings:"wdth" 85}
+.hero .mode{margin-left:auto;display:flex;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:3px}
+.hero .mode button{background:none;border:0;color:#CFE4EF;padding:6px 14px;border-radius:999px;cursor:pointer;font-size:14px;font-variation-settings:"wdth" 85}
+.hero .mode button[aria-pressed="true"]{background:#EAF3F8;color:#02070C}
+.hero .caption{position:absolute;right:24px;top:calc(env(safe-area-inset-top,0px) + 22px);font-size:12.5px;color:#8FB0C2;max-width:30ch;text-align:right;font-variation-settings:"wdth" 80}
+.ir-legend{display:none;margin-top:6px;height:8px;border-radius:4px;background:linear-gradient(90deg,#3a3a3a,#9a9a9a,#2bd2ff,#1846e0,#19c44a,#f6f63a,#ff8a1a,#e8171d,#6b0a0a,#fff)}
+.hero.ir .ir-legend{display:block}
+
+/* ---------- layout ---------- */
+.shell{max-width:1240px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);align-self:start;padding:34px 0;height:max-content}
+.rail ol{list-style:none;margin:0;padding:0;position:relative}
+.rail ol::before{content:"";position:absolute;left:8px;top:10px;bottom:10px;width:2px;background:repeating-linear-gradient(var(--rule) 0 6px,transparent 6px 11px)}
+.rail li{position:relative;padding:5px 0 5px 30px}
+.rail a{color:var(--ink-3);text-decoration:none;font-size:14.5px;font-variation-settings:"wdth" 85;line-height:1.3;display:block}
+.rail a:hover{color:var(--ink)}
+.rail .dot{position:absolute;left:1px;top:8px;width:16px;height:16px;border-radius:50%;border:2px solid var(--rule);background:var(--paper);transition:all .4s}
+.rail li.done .dot{background:var(--c);border-color:var(--c)}
+.rail li.on a{color:var(--ink);font-weight:650}
+.rail li.on .dot{background:var(--c);border-color:var(--ink);transform:scale(1.2)}
+.rail .lab{font-size:12px;color:var(--ink-3);font-variation-settings:"wdth" 75;margin:14px 0 0 30px}
+main{min-width:0;padding:34px 0 80px}
+section.block{padding:56px 0 30px;border-top:1px solid var(--rule-2)}
+section.block:first-child{border-top:0;padding-top:12px}
+.prose{max-width:70ch}
+.prose p{margin:0 0 1em}
+h2.sec{font-weight:800;font-variation-settings:"wdth" 112;font-size:clamp(30px,4.2vw,46px);line-height:1.02;letter-spacing:-.015em;margin:0 0 6px;max-width:20ch}
+.secnum{display:inline-flex;align-items:center;gap:10px;font-variation-settings:"wdth" 80;color:var(--ink-3);font-size:15px;margin:0 0 12px}
+.secnum i{width:12px;height:12px;border-radius:50%;background:var(--c,var(--accent));display:inline-block}
+.lede{font-size:20px;line-height:1.5;color:var(--ink-2);margin:10px 0 26px;max-width:58ch}
+h3{font-weight:750;font-variation-settings:"wdth" 105;font-size:22px;line-height:1.2;margin:34px 0 10px}
+h4{font-weight:700;font-size:17px;margin:0 0 6px;font-variation-settings:"wdth" 95}
+strong{font-weight:680}
+.kw{font-weight:680;background:linear-gradient(transparent 62%,var(--accent-soft) 62%)}
+
+/* ---------- panels ---------- */
+.panel{background:var(--panel);border:1px solid var(--rule-2);border-radius:var(--r-lg);box-shadow:var(--shadow)}
+.lab{margin:26px 0}
+.lab-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;padding:16px 20px 0}
+.lab-head h4{margin:0;font-size:18px}
+.lab-head p{margin:0;color:var(--ink-3);font-size:14.5px;font-variation-settings:"wdth" 88}
+.lab-body{padding:16px 20px 20px}
+.split{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px}
+.split.even{grid-template-columns:1fr 1fr}
+.stage-canvas{width:100%;display:block;border-radius:var(--r-md);background:#03101A}
+.ctrl{margin:0 0 16px}
+.ctrl label,.ctrl .lbl{display:flex;justify-content:space-between;gap:8px;font-size:14.5px;font-weight:600;font-variation-settings:"wdth" 88;margin-bottom:6px}
+.ctrl .val{font-weight:700;color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--paper-2);padding:4px;border-radius:10px}
+.seg button{flex:1;border:0;background:none;padding:7px 8px;border-radius:7px;cursor:pointer;font-size:14px;font-variation-settings:"wdth" 88;min-width:max-content}
+.seg button[aria-pressed="true"]{background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.15);font-weight:650}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--accent);color:var(--accent-ink);padding:10px 18px;border-radius:10px;cursor:pointer;font-weight:650;font-size:15.5px;font-variation-settings:"wdth" 92;text-decoration:none}
+.btn:hover{filter:brightness(1.07)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+.btn.warn{background:var(--warn);color:#fff}
+.btn.sm{padding:6px 12px;font-size:14px}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:12px 0}
+.readout div{background:var(--paper-2);border-radius:10px;padding:8px 12px}
+.readout b{display:block;font-size:20px;font-weight:750;font-variation-settings:"wdth" 100;line-height:1.1}
+.readout span{font-size:12.5px;color:var(--ink-3);font-variation-settings:"wdth" 80}
+.note{font-size:14px;color:var(--ink-3);font-variation-settings:"wdth" 90;margin:8px 0 0}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:18px 0}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}
+.callout.watch{border-color:var(--watch);background:var(--watch-soft)}
+.callout.good{border-color:var(--good);background:var(--good-soft)}
+.callout p{margin:0}
+.callout p+p{margin-top:6px}
+
+/* stage pipeline */
+.pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:12px 0 4px;position:relative}
+.pipeline .st{padding:10px 10px 10px 12px;border-top:4px solid var(--rule);font-size:14px;line-height:1.3;transition:all .4s;color:var(--ink-3)}
+.pipeline .st b{display:block;font-size:15px;color:var(--ink-2);font-variation-settings:"wdth" 92}
+.pipeline .st.on{border-color:var(--c);color:var(--ink-2)}
+.pipeline .st.on b{color:var(--ink)}
+.pipeline .st.now{background:color-mix(in srgb,var(--c) 14%,transparent)}
+
+/* questions */
+.qs{margin:30px 0 0;border:1.5px dashed var(--rule);border-radius:var(--r-lg);padding:16px 20px 12px;background:color-mix(in srgb,var(--panel) 55%,transparent)}
+.qs h4{display:flex;align-items:center;gap:8px;font-size:16px}
+.qs ol{margin:8px 0 6px;padding-left:22px}
+.qs li{margin:0 0 8px;line-height:1.5}
+
+/* tables */
+.tablewrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--rule-2)}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:560px}
+th{text-align:left;font-variation-settings:"wdth" 85;font-weight:650;font-size:13.5px;color:var(--ink-3);padding:10px 12px;border-bottom:1px solid var(--rule)}
+td{padding:10px 12px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tr.hl td{background:color-mix(in srgb,var(--c) 16%,transparent)}
+.catpill{display:inline-flex;align-items:center;justify-content:center;min-width:44px;padding:2px 8px;border-radius:6px;font-weight:750;font-size:13.5px;font-variation-settings:"wdth" 85;color:#1b1b1b}
+.catpill.dk{color:#fff}
+
+/* chips & cards */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.toolcard{border:1px solid var(--rule-2);background:var(--panel);border-radius:var(--r-md);padding:12px 14px;cursor:pointer;text-align:left;transition:border-color .2s,transform .2s}
+.toolcard:hover{border-color:var(--accent)}
+.toolcard[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.toolcard .ic{font-size:22px;line-height:1}
+.toolcard b{display:block;margin-top:4px;font-variation-settings:"wdth" 95}
+.toolcard span{font-size:13.5px;color:var(--ink-3);line-height:1.35;display:block}
+
+/* alerts */
+.alerts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}
+.alert{border-radius:var(--r-md);padding:16px 18px;border:1px solid}
+.alert.watch{background:var(--watch-soft);border-color:color-mix(in srgb,var(--watch) 45%,transparent)}
+.alert.warning{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.alert h4{font-size:19px;margin:0 0 6px}
+.alert.watch h4{color:var(--watch)}
+.alert.warning h4{color:var(--warn)}
+.alert p{margin:0;font-size:16px}
+
+/* timeline */
+.tl-status{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0}
+.badge{display:inline-block;padding:4px 12px;border-radius:999px;font-weight:750;font-size:14px;font-variation-settings:"wdth" 90}
+.badge.none{background:var(--paper-2);color:var(--ink-2)}
+.badge.watch{background:var(--watch);color:#231400}
+.badge.warning{background:var(--warn);color:#fff}
+.badge.storm{background:#5b2a86;color:#fff}
+.badge.after{background:var(--good);color:#fff}
+.checklist{list-style:none;padding:0;margin:8px 0}
+.checklist li{padding:6px 0 6px 28px;position:relative;border-bottom:1px solid var(--rule-2);font-size:15.5px}
+.checklist li::before{content:"";position:absolute;left:4px;top:11px;width:12px;height:12px;border-radius:3px;border:2px solid var(--accent)}
+
+/* names wall */
+.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
+.names button{border:1px solid var(--rule-2);background:var(--panel);border-radius:8px;padding:8px 10px;text-align:left;cursor:pointer;position:relative;overflow:hidden}
+.names button::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
+.names button b{display:block;font-variation-settings:"wdth" 92;font-size:15.5px;text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:color-mix(in srgb,var(--ink) 45%,transparent)}
+.names button span{font-size:12.5px;color:var(--ink-3)}
+.names button[aria-pressed="true"]{border-color:var(--ink)}
+
+/* safety */
+.zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px}
+.zones button{border:1px solid var(--rule);background:var(--panel);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;font-size:14.5px;line-height:1.3}
+.zones button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.verdict{border-radius:var(--r-md);padding:14px 16px;margin-top:12px}
+.verdict.go{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent)}
+.verdict.stay{background:var(--good-soft);border:1px solid color-mix(in srgb,var(--good) 40%,transparent)}
+.verdict h4{font-size:18px}
+.verdict p{margin:4px 0 0}
+.kit{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
+.kit button{border:1.5px solid var(--rule);background:var(--panel);border-radius:12px;padding:10px;cursor:pointer;text-align:center;font-size:14px;line-height:1.25;min-height:86px;transition:transform .15s}
+.kit button .e{font-size:26px;display:block;margin-bottom:4px}
+.kit button[aria-pressed="true"]{border-color:var(--good);background:var(--good-soft)}
+.kit button.bad[aria-pressed="true"]{border-color:var(--warn);background:var(--warn-soft)}
+.kit button:active{transform:scale(.96)}
+.meter{height:12px;border-radius:999px;background:var(--paper-2);overflow:hidden;margin:6px 0}
+.meter i{display:block;height:100%;background:var(--good);width:0;transition:width .4s}
+.story{min-height:300px}
+.story .scene{font-size:13px;color:var(--ink-3);font-variation-settings:"wdth" 80}
+.story h4{font-size:21px;margin:4px 0 8px}
+.choices{display:grid;gap:8px;margin-top:14px}
+.choices button{text-align:left;border:1px solid var(--rule);background:var(--panel);border-radius:10px;padding:12px 14px;cursor:pointer;font-size:15.5px}
+.choices button:hover{border-color:var(--accent)}
+.choices button.right{border-color:var(--good);background:var(--good-soft)}
+.choices button.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.flips{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.flip{perspective:900px;min-height:200px;border:0;background:none;padding:0;cursor:pointer;text-align:left}
+.flip .fi{position:relative;height:100%;min-height:200px;transition:transform .6s;transform-style:preserve-3d}
+.flip[aria-pressed="true"] .fi{transform:rotateY(180deg)}
+.flip .fa,.flip .fb{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--r-md);padding:16px;border:1px solid var(--rule-2);background:var(--panel)}
+.flip .fa{display:flex;flex-direction:column;justify-content:space-between}
+.flip .fa .e{font-size:34px}
+.flip .fa b{font-size:18px;font-variation-settings:"wdth" 100}
+.flip .fa span{font-size:13px;color:var(--ink-3)}
+.flip .fb{transform:rotateY(180deg);background:var(--accent-soft);font-size:15px;line-height:1.45;overflow:auto}
+
+/* forecast lab */
+.labshell{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:0;align-items:start}
+.mapwrap{position:relative;background:var(--ocean);min-height:340px;border-right:1px solid var(--rule-2)}
+.mapwrap canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.maphud{position:absolute;left:10px;bottom:10px;background:color-mix(in srgb,var(--panel) 88%,transparent);border:1px solid var(--rule-2);border-radius:8px;padding:4px 10px;font-size:13px;pointer-events:none;font-variant-numeric:tabular-nums}
+.maptitle{position:absolute;left:10px;top:10px;background:color-mix(in srgb,var(--panel) 88%,transparent);border:1px solid var(--rule-2);border-radius:8px;padding:4px 10px;font-size:13px;pointer-events:none;font-variation-settings:"wdth" 85;max-width:70%}
+.side{padding:18px 20px;border-left:1px solid var(--rule-2);min-height:100%}
+#labMapWrap{position:sticky;top:calc(env(safe-area-inset-top,0px) + 62px);border-right:0;min-height:0;border-bottom-left-radius:var(--r-lg)}
+.steps{display:flex;gap:4px;padding:10px;border-bottom:1px solid var(--rule-2);overflow-x:auto;background:var(--paper-2)}
+.steps button{flex:1 0 auto;border:0;background:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:14px;font-variation-settings:"wdth" 85;color:var(--ink-2);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.steps button .d{width:10px;height:10px;border-radius:50%;border:2px solid var(--ink-3)}
+.steps button.done .d{background:var(--good);border-color:var(--good)}
+.steps button[aria-current="step"]{background:var(--panel);color:var(--ink);font-weight:650;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.obs{width:100%;font-size:13.5px;min-width:0}
+.obs th,.obs td{padding:5px 6px}
+.clue{border:1px solid var(--rule-2);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:14.5px;line-height:1.45}
+.clue b{font-variation-settings:"wdth" 92}
+.catpick{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.catpick button{border:2px solid transparent;border-radius:8px;padding:8px 0;cursor:pointer;font-weight:750;font-size:14px;font-variation-settings:"wdth" 85;color:#1b1b1b}
+.catpick button.dk{color:#fff}
+.catpick button[aria-pressed="true"]{border-color:var(--ink);transform:translateY(-2px);box-shadow:0 3px 0 var(--ink)}
+textarea{width:100%;border:1px solid var(--rule);border-radius:10px;padding:10px;background:var(--paper);resize:vertical;min-height:70px;font-size:15px}
+.mystery{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:10px 0}
+.mystery button{border:1px solid var(--rule);background:var(--panel);border-radius:10px;padding:10px;cursor:pointer;text-align:left}
+.mystery button b{display:block;font-size:16px}
+.mystery button span{font-size:12.5px;color:var(--ink-3)}
+.mystery button.done{border-color:var(--good)}
+.score{font-size:40px;font-weight:850;font-variation-settings:"wdth" 110;line-height:1}
+.feedback{border-radius:10px;padding:12px 14px;margin:10px 0;font-size:15px}
+.feedback.ok{background:var(--good-soft)}
+.feedback.meh{background:var(--watch-soft)}
+.feedback.no{background:var(--warn-soft)}
+.mcq{display:grid;gap:6px;margin:10px 0}
+.mcq button{border:1px solid var(--rule);background:var(--panel);border-radius:8px;padding:8px 12px;text-align:left;cursor:pointer;font-variant-numeric:tabular-nums}
+.mcq button.right{border-color:var(--good);background:var(--good-soft)}
+.mcq button.wrong{border-color:var(--warn);background:var(--warn-soft)}
+
+/* policy, submit, footer */
+.policy{display:flex;gap:16px;align-items:flex-start;border:2px solid var(--warn);border-radius:var(--r-lg);padding:16px 20px;background:var(--warn-soft);margin:0 0 20px}
+.policy .lvl{flex-shrink:0;background:var(--warn);color:#fff;font-weight:800;font-size:13px;padding:5px 10px;border-radius:8px;font-variation-settings:"wdth" 85;text-align:center;line-height:1.15}
+.policy h4{color:var(--warn);font-size:18px}
+.policy p{margin:0;font-size:16px}
+.targets{list-style:none;padding:0;margin:0;counter-reset:t}
+.targets li{position:relative;padding:10px 0 10px 40px;border-bottom:1px solid var(--rule-2)}
+.targets li::before{counter-increment:t;content:counter(t);position:absolute;left:0;top:10px;width:26px;height:26px;border-radius:50%;background:var(--paper-2);display:grid;place-items:center;font-weight:700;font-size:14px}
+.docbox{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:18px 20px;border-radius:var(--r-lg);background:var(--good-soft);border:1px solid color-mix(in srgb,var(--good) 35%,transparent);margin:20px 0}
+.docbox p{margin:0;max-width:52ch}
+.docbox .btn{background:var(--good);color:#fff}
+.selfcheck{list-style:none;padding:0}
+.selfcheck li{padding:8px 0 8px 34px;position:relative;border-bottom:1px solid var(--rule-2)}
+.selfcheck input{position:absolute;left:4px;top:11px;width:18px;height:18px;accent-color:var(--good)}
+.stdgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.stdgrid .item{padding:10px 0;border-bottom:1px solid var(--rule-2)}
+.stdgrid .item b{display:block;font-variation-settings:"wdth" 95}
+.stdgrid .item span{font-size:15px;color:var(--ink-2)}
+.ccc{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ccc span{border:1px solid var(--rule);border-radius:999px;padding:3px 12px;font-size:14px}
+.endquote{text-align:center;padding:60px 20px 80px;font-size:clamp(22px,3vw,32px);font-weight:600;font-variation-settings:"wdth" 92;max-width:30ch;margin:0 auto;line-height:1.3}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;color:var(--ink-3);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.svgscene{width:100%;display:block;border-radius:var(--r-md)}
+.tag{display:inline-block;font-size:12.5px;padding:2px 8px;border-radius:999px;background:var(--paper-2);color:var(--ink-2);font-variation-settings:"wdth" 85}
+
+@media (max-width:1020px){
+  .shell{grid-template-columns:1fr;gap:0}
+  .rail{display:none}
+  .labshell{grid-template-columns:1fr}
+  .mapwrap{border-right:0;border-bottom:1px solid var(--rule-2)}
+  #labMapWrap{position:relative;top:0;border-radius:0}
+  .side{border-left:0}
+  .side{max-height:none}
+}
+@media (max-width:760px){
+  body{font-size:16.5px}
+  .split,.split.even,.alerts,.stdgrid{grid-template-columns:1fr}
+  .pipeline{grid-template-columns:1fr 1fr}
+  .hero .mode{margin-left:0}
+  .hero .caption{display:none}
+  .shell{padding:0 16px}
+  .lab-head,.lab-body{padding-left:14px;padding-right:14px}
+  .topbar .where{display:none}
+  .catpick{grid-template-columns:repeat(3,1fr)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+}
+
+/* ---------- student work ---------- */
+.anscount{font-size:13.5px;font-variation-settings:"wdth" 85;text-decoration:none;color:var(--ink);background:var(--accent-soft);border-radius:999px;padding:5px 11px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.field{width:100%;border:1px solid var(--rule);border-radius:10px;padding:10px 12px;background:var(--paper);font-size:16px}
+.field:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.qs li textarea{display:block;margin:8px 0 6px;min-height:84px;background:var(--panel)}
+.qs h4{flex-wrap:wrap}
+.qstat{margin-left:auto;font-size:13px;font-weight:600;color:var(--ink-3);font-variation-settings:"wdth" 85;background:var(--paper-2);padding:2px 10px;border-radius:999px}
+.qstat.all{background:var(--good-soft);color:var(--good)}
+.obsbox{margin-top:22px;padding:16px 18px;border:1.5px dashed var(--rule);border-radius:var(--r-md);background:color-mix(in srgb,var(--paper) 60%,transparent)}
+.obsbox h4{margin:0 0 4px}
+.ql{display:block;font-size:15.5px;line-height:1.45;margin:14px 0 6px;font-weight:550}
+.obsbox textarea{min-height:84px;background:var(--panel)}
+.ir-key{margin-top:10px;max-width:420px}
+.ir-bar{height:10px;border-radius:5px;background:linear-gradient(90deg,#232323,#8f8f8f,#d0d0d0,#2bd2ff,#1846e0,#19c44a,#f6f63a,#ff8a1a,#e8171d,#6b0a0a)}
+.ir-lbls{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink-3);margin-top:4px;font-variation-settings:"wdth" 85}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{border:1px solid var(--rule);background:var(--panel);border-radius:999px;padding:6px 13px;cursor:pointer;font-size:14px;font-variation-settings:"wdth" 88}
+.presets button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.kit button.meh[aria-pressed="true"]{border-color:var(--watch);background:var(--watch-soft)}
+.selfcheck li{padding:9px 0 9px 36px}
+.selfcheck .tick{position:absolute;left:2px;top:9px;width:22px;height:22px;border-radius:6px;border:2px solid var(--rule);display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff}
+.selfcheck li.ok .tick{background:var(--good);border-color:var(--good)}
+.owncheck{display:flex;gap:10px;align-items:flex-start;margin:14px 0 0;padding:12px 14px;border-radius:10px;background:var(--paper-2);max-width:70ch;cursor:pointer}
+.owncheck input{width:20px;height:20px;margin-top:2px;accent-color:var(--good);flex-shrink:0}
+.report{padding:22px 26px;margin-top:14px;max-height:640px;overflow:auto}
+.report .rp-kicker{color:var(--ink-3);margin:0;font-size:14px}
+.report h2{margin:2px 0 6px;font-size:26px;font-variation-settings:"wdth" 110}
+.report .rp-head p{margin:2px 0}
+.report .rp-sec{margin:22px 0 0}
+.report h3{margin:0 0 8px;font-size:19px;padding-bottom:6px;border-bottom:2px solid var(--accent)}
+.report .rp-ql{font-weight:650;margin:12px 0 4px;font-size:15px}
+.report .rp-a{margin:0;padding:8px 12px;background:var(--paper-2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;font-size:15.5px}
+.report .rp-a.empty{color:var(--warn);background:var(--warn-soft);border-color:var(--warn);font-style:italic}
+.report table{min-width:0;font-size:14px;margin:4px 0}
+.report th,.report td{border:1px solid var(--rule-2);padding:5px 8px}
+.report tr.ev td{font-size:13.5px;color:var(--ink-2)}
+details.danger{margin-top:20px}
+details.danger summary{cursor:pointer;color:var(--ink-3);font-size:14.5px}
+#printArea{display:none}
+@media print{
+  body>*:not(#printArea){display:none !important}
+  #printArea{display:block !important;color:#000}
+}
+/* ---------- easier-reading version ---------- */
+body{font-size:19.5px;line-height:1.7}
+.prose{max-width:62ch}
+.prose p{margin:0 0 .9em}
+.lede{font-size:22px;color:var(--ink)}
+h2.sec{font-size:clamp(30px,4.4vw,48px)}
+h3{font-size:24px}
+.say{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--accent);background:var(--panel);color:var(--accent);border-radius:999px;padding:4px 14px;font-size:15px;font-weight:650;cursor:pointer;margin:0 0 10px;font-variation-settings:"wdth" 90}
+.say[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.qs li .say,.mcq-card .q .say,.sense .say{margin:8px 0 0 8px;font-size:14px}
+.mcq-card .q .say{margin:0 0 0 10px;vertical-align:middle}
+.howto{list-style:none;padding:0;margin:4px 0 14px;display:grid;gap:8px}
+.howto li{display:flex;gap:12px;align-items:center;background:var(--paper-2);border-radius:12px;padding:10px 14px;font-size:17.5px}
+.howto .i{font-size:24px}
+.vocab{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.vocab .flip,.vocab .flip .fi{min-height:170px}
+.vocab .fb{font-size:16.5px}
+.seg.big button{padding:11px 8px;font-size:16px}
+.senses{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:18px 0}
+.sense{background:var(--panel);border:1px solid var(--rule-2);border-top:6px solid var(--sc);border-radius:var(--r-md);padding:14px 16px}
+.sense h4{font-size:18px;margin:0 0 8px}
+.sense ul{list-style:none;margin:0;padding:0}
+.sense li{display:flex;gap:10px;padding:6px 0;font-size:16.5px;line-height:1.45;border-bottom:1px solid var(--rule-2)}
+.sense li:last-child{border-bottom:0}
+.sense li span{font-size:22px;line-height:1.1}
+.sortcard{font-size:24px;font-weight:650;line-height:1.35;padding:22px 24px;border-radius:var(--r-md);background:var(--paper-2);border:2px dashed var(--rule);margin:6px 0 14px;max-width:34ch}
+.btn.big{font-size:19px;padding:14px 24px}
+.btn.watchbtn{background:var(--watch);color:#231400}
+.btn.warnbtn{background:var(--warn);color:#fff}
+.mc{margin:28px 0 0;border:2px solid var(--accent-soft);border-radius:var(--r-lg);padding:16px 20px;background:var(--panel)}
+.mc h4{font-size:19px;margin:0 0 6px}
+.mcq-card{padding:12px 0;border-top:1px solid var(--rule-2)}
+.mcq-card .q{font-weight:650;margin:0 0 8px;font-size:18.5px}
+.mcq-card .qn{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);margin-right:10px;font-size:15px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:600px){.opts{grid-template-columns:1fr}}
+.opts button{border:2px solid var(--rule);background:var(--panel);border-radius:12px;padding:12px 14px;text-align:left;cursor:pointer;font-size:17px;line-height:1.35}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.right{border-color:var(--good);background:var(--good-soft)}
+.opts button.wrong{border-color:var(--warn);background:var(--warn-soft);opacity:.75}
+.opts button:disabled{cursor:default}
+.qs li{font-size:18.5px}
+.qs li textarea{font-size:17px}
+.starter{margin:2px 8px 0 0}
+.rstep{border:1px solid var(--rule-2);border-radius:var(--r-md);background:var(--panel);margin:0 0 8px;padding:0 16px}
+.rstep summary{cursor:pointer;padding:14px 0;font-weight:700;font-size:19px;display:flex;align-items:center;gap:12px;list-style:none}
+.rstep summary::-webkit-details-marker{display:none}
+.rstep summary::after{content:"＋";margin-left:auto;color:var(--ink-3)}
+.rstep[open] summary::after{content:"－"}
+.rstep .n{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--good);color:#fff;font-size:16px}
+.rstep p{margin:0 0 14px;font-size:17.5px}
+.helpers{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.helper{background:var(--panel);border:1px solid var(--rule-2);border-radius:var(--r-md);padding:14px 16px}
+.helper .e{font-size:30px;display:block}
+.helper b{font-size:17.5px}
+.helper p{margin:4px 0 0;font-size:16px;line-height:1.45;color:var(--ink-2)}
+.feelgame,.planpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.feelgame button,.planpick button{border:2px solid var(--rule);background:var(--panel);border-radius:12px;padding:12px 14px;text-align:left;cursor:pointer;font-size:17px;line-height:1.35}
+.feelgame button[aria-pressed="true"],.planpick button[aria-pressed="true"]{border-color:var(--good);background:var(--good-soft)}
+.feelgame button.bad[aria-pressed="true"]{border-color:var(--warn);background:var(--warn-soft)}
+.planpick button[aria-pressed="true"]::before{content:"✓ ";font-weight:800;color:var(--good)}
+.kit button{font-size:15px}
+@media (max-width:760px){ body{font-size:18px} .lede{font-size:20px} .sortcard{font-size:20px} }
+
+.roomlist{display:none}
+@media (max-width:760px){ .roomlist{display:grid;grid-template-columns:1fr 1fr} .topbar .brand{display:none} }
+</style>
+</head>
+<body>
+<div class="topbar" id="topbar"><div class="in"><span class="brand">Hurricane Safety</span><span class="where" id="where">Start here</span><span class="sp"></span><a class="anscount" id="ansCount" href="#submit">0 done</a><button class="theme-btn" id="themeBtn" type="button">Theme: auto</button></div><div class="progress-line" id="progLine"></div></div>
+
+<header class="hero" id="hero">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <p class="caption" id="heroCap">This is what a hurricane looks like from space. It spins around a calm center called the eye.</p>
+  <div class="in">
+    <p class="unit">Dangerous Earth, Unit 3 · Day 20</p>
+    <h1>Hurricane Safety</h1>
+    <p class="dq">Be ready. Stay safe. Recover.</p>
+    <div class="row">
+      <div class="mode" role="group" aria-label="Satellite view">
+        <button type="button" data-mode="vis" aria-pressed="true">Regular view</button>
+        <button type="button" data-mode="ir" aria-pressed="false">Heat view</button>
+      </div>
+    </div>
+    <div style="max-width:320px"><div class="ir-legend"></div><p class="note" id="irNote" style="color:#9CC2D6;display:none">Heat view shows how cold the cloud tops are. Red and black are the coldest, tallest storm clouds.</p></div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" aria-label="Lesson sections">
+    <ol id="railList">
+      <li data-sec="start" style="--c:var(--td)"><span class="dot"></span><a href="#start">Start here</a></li>
+      <li data-sec="s1" style="--c:var(--ts)"><span class="dot"></span><a href="#s1">1. What is a hurricane?</a></li>
+      <li data-sec="s2" style="--c:var(--c1)"><span class="dot"></span><a href="#s2">2. What will I see and feel?</a></li>
+      <li data-sec="s3" style="--c:var(--c2)"><span class="dot"></span><a href="#s3">3. Watch or warning?</a></li>
+      <li data-sec="s4" style="--c:var(--c3)"><span class="dot"></span><a href="#s4">4. Get ready and stay safe</a></li>
+      <li data-sec="s5" style="--c:var(--c4)"><span class="dot"></span><a href="#s5">5. Make the right choice</a></li>
+      <li data-sec="s6" style="--c:var(--c5)"><span class="dot"></span><a href="#s6">6. After the storm</a></li>
+      <li data-sec="s7" style="--c:var(--c5)"><span class="dot"></span><a href="#s7">7. Check what you know</a></li>
+      <li data-sec="submit" style="--c:var(--good)"><span class="dot"></span><a href="#submit">My report</a></li>
+    </ol>
+    <p class="lab">The dots change color as you go, like a storm getting stronger.</p>
+  </nav>
+
+  <main>
+  <!-- START -->
+  <section class="block" id="start" data-sec="start">
+    <div class="policy" role="note">
+      <div class="lvl">Level 0<br>Red</div>
+      <div><h4>No AI tools today</h4>
+      <p>Do not use AI tools like ChatGPT, Claude, Gemini, or Copilot. Your answers should come from you. That is how you learn it for real.</p></div>
+    </div>
+
+    <h2 class="sec">How do we stay safe when a hurricane comes?</h2>
+    <div class="prose">
+      <p class="lede">A hurricane is a giant, spinning storm. It can bring very strong wind, lots of rain, and flooding.</p>
+      <p>The good news: we can see hurricanes coming days ahead of time. That gives people time to get ready. Today you will learn what a hurricane is, what it looks and feels like, how to stay safe, and what to do after it is over.</p>
+    </div>
+
+    <div class="panel lab" id="whoCard">
+      <div class="lab-head"><h4>Start here</h4></div>
+      <div class="lab-body">
+        <div class="split even">
+          <div class="ctrl"><label for="stuName">Your name</label><input class="field" id="stuName" autocomplete="name" placeholder="First and last name"></div>
+          <div class="ctrl"><label for="stuPer">Class period</label><input class="field" id="stuPer" placeholder="e.g. 3rd"></div>
+        </div>
+        <ol class="howto">
+          <li><span class="i">🔊</span><span>Tap <strong>Read to me</strong> to hear any part of this page out loud.</span></li>
+          <li><span class="i">✅</span><span>Answer the <strong>Quick check</strong> questions. You can try again if you miss one.</span></li>
+          <li><span class="i">✏️</span><span>Write short answers in the boxes. Tap <strong>Help me start</strong> if you get stuck.</span></li>
+          <li><span class="i">📄</span><span>At the end, download your report and turn it in on Canvas.</span></li>
+        </ol>
+        <p class="note" style="margin-top:0">Your work saves by itself. Stay on the same computer the whole time.</p>
+      </div>
+    </div>
+
+    <h3>Words to know</h3>
+    <div class="prose"><p>Tap a card to see what the word means.</p></div>
+    <div class="flips vocab" id="vocab"></div>
+  </section>
+
+  <!-- S1 -->
+  <section class="block" id="s1" data-sec="s1" style="--c:var(--ts)">
+    <p class="secnum"><i></i>Part 1 of 7</p>
+    <h2 class="sec">What is a hurricane?</h2>
+    <div class="prose">
+      <p class="lede">A hurricane is a huge storm that spins. It starts over warm ocean water.</p>
+      <p><strong>Warm water is the fuel.</strong> The warm ocean heats the air above it. The warm, wet air rises up and makes big thunderstorms.</p>
+      <p><strong>Earth’s spin makes it turn.</strong> The storms start to spin around a center. When the wind reaches <strong>74 miles per hour</strong>, it is called a hurricane.</p>
+      <p><strong>Land and cool water make it weaker.</strong> Without warm water, the storm runs out of fuel.</p>
+    </div>
+
+    <div class="panel lab" id="growLab">
+      <div class="lab-head"><h4>Grow a storm</h4><p>Pick the water temperature. Then press Start.</p></div>
+      <div class="lab-body">
+        <div class="split">
+          <div><canvas class="stage-canvas" id="growCanvas" aria-label="Storm growing over the ocean"></canvas>
+            <div class="pipeline" id="growSteps">
+              <div class="st" style="--c:var(--td)" data-s="0"><b>Storms</b>Small, messy storms</div>
+              <div class="st" style="--c:var(--td)" data-s="1"><b>Spinning</b>Starts to turn</div>
+              <div class="st" style="--c:var(--ts)" data-s="2"><b>Tropical storm</b>Gets a name</div>
+              <div class="st" style="--c:var(--c3)" data-s="3"><b>Hurricane</b>74 mph or more</div>
+            </div>
+          </div>
+          <div>
+            <div class="ctrl"><span class="lbl">Ocean water</span><div class="seg big" id="waterSeg"><button type="button" data-v="0" aria-pressed="false">❄️ Cool</button><button type="button" data-v="1" aria-pressed="false">🌤️ Warm</button><button type="button" data-v="2" aria-pressed="true">🔥 Very warm</button></div></div>
+            <div class="ctrl"><span class="lbl">View</span><div class="seg" id="growView"><button type="button" data-v="vis" aria-pressed="true">Regular</button><button type="button" data-v="ir" aria-pressed="false">Heat view</button></div></div>
+            <div class="btnrow"><button class="btn" id="growGo" type="button">Start</button></div>
+            <div class="readout"><div><b class="num" id="growWind">25 mph</b><span>Wind speed</span></div><div><b id="growName">Storms</b><span>What it is now</span></div></div>
+            <div class="callout" id="growMsg" aria-live="polite"><p>Pick the water, then press Start.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>The parts of a hurricane</h3>
+    <div class="panel lab">
+      <div class="lab-head"><h4>Look inside a hurricane</h4><p>Tap a label to learn about that part.</p></div>
+      <div class="lab-body">
+        <svg id="xsec" class="svgscene" viewBox="0 0 900 420" role="img" aria-label="Inside view of a hurricane"></svg>
+        <div class="callout" id="xsecInfo" aria-live="polite"><p>Tap a label.</p></div>
+      </div>
+    </div>
+
+    <div class="mc" data-set="s1"></div>
+    <div class="qs"><h4>✏️ Write it: Part 1</h4><ol>
+      <li data-start="A hurricane needs warm ocean water because…">Why does a hurricane need warm ocean water?</li>
+    </ol></div>
+  </section>
+
+  <!-- S2 -->
+  <section class="block" id="s2" data-sec="s2" style="--c:var(--c1)">
+    <p class="secnum"><i></i>Part 2 of 7</p>
+    <h2 class="sec">What will I see, hear, and feel?</h2>
+    <div class="prose">
+      <p class="lede">A hurricane does not hit all at once. It gets worse over many hours. Knowing what is coming helps you stay calm and make good choices.</p>
+    </div>
+    <div class="senses" id="senses"></div>
+
+    <h3>Watch the water rise</h3>
+    <div class="prose">
+      <p>The ocean can rise and flood the land. This is called <strong>storm surge</strong>. It is the most dangerous part of most hurricanes. Start on a normal day. Then try stronger storms.</p>
+    </div>
+    <div class="panel lab">
+      <div class="lab-body">
+        <svg id="beach" class="svgscene" viewBox="0 0 900 420" role="img" aria-label="Beach town in a storm"></svg>
+        <div class="ctrl" style="margin-top:12px"><label for="windS">Wind speed <span class="val num" id="windSVal">Calm</span></label><input type="range" id="windS" min="0" max="185" step="1" value="0"></div>
+        <div class="presets" id="beachPresets"><button type="button" data-w="0" aria-pressed="true">Normal day</button><button type="button" data-w="60" aria-pressed="false">Tropical storm</button><button type="button" data-w="85" aria-pressed="false">Cat 1</button><button type="button" data-w="103" aria-pressed="false">Cat 2</button><button type="button" data-w="120" aria-pressed="false">Cat 3</button><button type="button" data-w="143" aria-pressed="false">Cat 4</button><button type="button" data-w="170" aria-pressed="false">Cat 5</button></div>
+        <div class="btnrow" style="margin-top:10px"><button class="btn sm" type="button" id="markBtn">Mark this water level</button><button class="btn sm ghost" type="button" id="markClear">Clear marks</button></div>
+        <div class="readout"><div><b id="bCat">Normal day</b><span>Storm size</span></div><div><b class="num" id="bSurge">0 ft</b><span>Extra water</span></div><div><b id="bDmg" style="font-size:16px;line-height:1.3">None</b><span>What happens</span></div></div>
+        <p class="note">Hurricanes get a <strong>category</strong> from 1 to 5. A bigger number means stronger wind. But even a Category 1 can bring dangerous water.</p>
+      </div>
+    </div>
+
+    <h3>The calm in the middle</h3>
+    <div class="prose"><p>The center of a hurricane is called the <strong>eye</strong>. When the eye passes over you, the wind stops and it may get sunny. <strong>The storm is not over.</strong> The other side of the storm is coming.</p></div>
+    <div class="panel lab" id="eyeLab">
+      <div class="lab-head"><h4>The eye passes over your house</h4><p>Press Start. Watch the wind speed and the arrow.</p></div>
+      <div class="lab-body">
+        <div class="split">
+          <canvas id="eyeCanvas" class="stage-canvas" aria-label="Storm passing over a house"></canvas>
+          <div>
+            <canvas id="eyeGauges" style="width:100%;display:block" aria-hidden="true"></canvas>
+            <div class="btnrow" style="margin-top:8px"><button class="btn" id="eyePlay" type="button">Start the storm</button><button class="btn ghost" id="eyeReset" type="button">Reset</button></div>
+            <div id="eyeMsg" class="callout" aria-live="polite" style="margin-top:12px"><p>Your house is the white dot.</p></div>
+            <div class="btnrow" id="eyeChoice" hidden><button class="btn warn" type="button" data-c="out">Go outside to look</button><button class="btn ghost" type="button" data-c="in">Stay in my safe room</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mc" data-set="s2"></div>
+    <div class="qs"><h4>✏️ Write it: Part 2</h4><ol>
+      <li data-start="If it gets calm during a hurricane, I will…">What should you do if the storm suddenly gets calm? Why?</li>
+    </ol></div>
+  </section>
+
+  <!-- S3 -->
+  <section class="block" id="s3" data-sec="s3" style="--c:var(--c2)">
+    <p class="secnum"><i></i>Part 3 of 7</p>
+    <h2 class="sec">Watch or warning?</h2>
+    <div class="prose"><p class="lede">Weather experts send out alerts before a hurricane. There are two kinds. Each one tells you what to do.</p></div>
+    <div class="alerts">
+      <div class="alert watch"><h4>⚠️ Hurricane watch</h4><p><strong>The storm might come.</strong> It could arrive in about 2 days.</p><p style="margin-top:8px"><strong>Get ready:</strong> pack your kit, charge phones, make a plan.</p></div>
+      <div class="alert warning"><h4>🚨 Hurricane warning</h4><p><strong>The storm is coming.</strong> It will arrive in about 1 and a half days.</p><p style="margin-top:8px"><strong>Act now:</strong> if leaders say leave, leave right away.</p></div>
+    </div>
+    <p class="note">Memory tip: <strong>Watch = Wait and get ready. Warning = Work fast and go.</strong></p>
+
+    <div class="panel lab">
+      <div class="lab-head"><h4>Sort it</h4><p>Is each sentence about a watch or a warning? Tap a button.</p></div>
+      <div class="lab-body"><div id="sortWW" class="sortgame"></div></div>
+    </div>
+
+    <div class="panel lab">
+      <div class="lab-head"><h4>Countdown to the storm</h4><p>Slide to move through time. See what to do at each step.</p></div>
+      <div class="lab-body">
+        <canvas id="cdCanvas" style="width:100%;display:block" aria-hidden="true"></canvas>
+        <div class="ctrl"><label for="cd">Hours until the storm hits <span class="val num" id="cdVal">72 hours</span></label><input type="range" id="cd" min="-24" max="96" step="1" value="72" style="direction:rtl"></div>
+        <div class="tl-status"><span class="badge none" id="cdBadge">No alerts yet</span><strong id="cdHead"></strong></div>
+        <ul class="checklist" id="cdList"></ul>
+      </div>
+    </div>
+    <div class="mc" data-set="s3"></div>
+  </section>
+
+  <!-- S4 -->
+  <section class="block" id="s4" data-sec="s4" style="--c:var(--c3)">
+    <p class="secnum"><i></i>Part 4 of 7</p>
+    <h2 class="sec">Get ready and stay safe</h2>
+    <div class="prose">
+      <p class="lede">Remember this rule: <strong>Run from water. Hide from wind.</strong></p>
+      <p>If water could flood your home, you need to <strong>leave</strong> (this is called <strong>evacuating</strong>). If your home is safe from water, you can stay inside, away from windows.</p>
+    </div>
+
+    <h3>Stay or go?</h3>
+    <div class="panel lab"><div class="lab-body">
+      <svg id="zoneScene" class="svgscene" viewBox="0 0 900 300" role="img" aria-label="Five homes from the beach to inland"></svg>
+      <div class="zones" id="zones">
+        <button type="button" data-z="0" aria-pressed="false">🏝️ 1. Beach house on an island</button>
+        <button type="button" data-z="1" aria-pressed="false">🏘️ 2. Low house near the bay</button>
+        <button type="button" data-z="2" aria-pressed="false">🚐 3. Mobile home, far from the beach</button>
+        <button type="button" data-z="3" aria-pressed="false">🏠 4. Strong house on a hill, far from the beach</button>
+        <button type="button" data-z="4" aria-pressed="false">🏞️ 5. House next to a river</button>
+      </div>
+      <div id="zoneOut" aria-live="polite"></div>
+    </div></div>
+
+    <h3>Find the safe room</h3>
+    <div class="prose"><p>If you stay home, pick a room in the <strong>middle</strong> of the house, on the lowest floor that will not flood, with <strong>no windows</strong>. Tap the safest place in this house.</p></div>
+    <div class="panel lab"><div class="lab-body">
+      <svg id="houseMap" class="svgscene" viewBox="0 0 900 420" role="img" aria-label="Floor plan of a house"></svg>
+      <div id="houseOut" aria-live="polite"></div>
+    </div></div>
+
+    <h3>Pack your go-kit</h3>
+    <div class="prose"><p>Your backpack has room for <strong>16 things</strong>. Pick what you need for 3 days without power or stores. Some things you might want are not important. A few are dangerous.</p></div>
+    <div class="panel lab"><div class="lab-body">
+      <div class="split">
+        <div class="kit" id="kit"></div>
+        <div>
+          <div class="ctrl"><label for="fam">People in your home <span class="val num" id="famVal">4</span></label><input type="range" id="fam" min="1" max="8" value="4"></div>
+          <div class="readout"><div><b class="num" id="waterGal">12 gal</b><span>Water you need for 3 days (1 gallon per person each day)</span></div><div><b class="num" id="kitSlots">0 / 16</b><span>Backpack space used</span></div></div>
+          <div class="lbl" style="font-weight:600;font-size:14.5px">How ready is your kit?</div>
+          <div class="meter"><i id="kitMeter"></i></div>
+          <div id="kitMsg" class="callout" aria-live="polite"><p>Tap things to put them in your kit.</p></div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="mc" data-set="s4"></div>
+    <div class="qs"><h4>✏️ Write it: Part 4</h4><ol>
+      <li data-start="The three most important things in my kit are… because…">Name the three most important things in your kit. Why do you need them?</li>
+    </ol></div>
+  </section>
+
+  <!-- S5 -->
+  <section class="block" id="s5" data-sec="s5" style="--c:var(--c4)">
+    <p class="secnum"><i></i>Part 5 of 7</p>
+    <h2 class="sec">Make the right choice</h2>
+    <div class="prose"><p class="lede">You live in a low house near the bay. Water can flood your street. A hurricane is coming. What do you do?</p></div>
+    <div class="panel lab"><div class="lab-body story" id="story"></div></div>
+  </section>
+
+  <!-- S6 -->
+  <section class="block" id="s6" data-sec="s6" style="--c:var(--c5)">
+    <p class="secnum"><i></i>Part 6 of 7</p>
+    <h2 class="sec">After the storm: stay safe and recover</h2>
+    <div class="prose">
+      <p class="lede">When the wind stops, the danger is not over. Many people get hurt <strong>after</strong> a hurricane. Wait until adults or leaders say it is safe to go outside.</p>
+    </div>
+    <h3>Hidden dangers</h3>
+    <div class="prose"><p>Tap each card to see the danger and what to do.</p></div>
+    <div class="flips" id="flips"></div>
+
+    <div class="panel lab">
+      <div class="lab-head"><h4>How deep is too deep?</h4><p>Slide the water up. Watch what happens.</p></div>
+      <div class="lab-body">
+        <svg id="floodScene" class="svgscene" viewBox="0 0 900 300" role="img" aria-label="Flooded street with a person and a car"></svg>
+        <div class="ctrl" style="margin-top:10px"><label for="flood">Moving water <span class="val num" id="floodVal">0 in</span></label><input type="range" id="flood" min="0" max="36" value="0"></div>
+        <div class="callout warn" id="floodMsg" aria-live="polite"><p><strong>Turn around, don’t drown.</strong> Never walk or drive into floodwater.</p></div>
+      </div>
+    </div>
+
+    <h3>Getting back to normal takes time</h3>
+    <div class="prose"><p>After a big hurricane, it can take days, weeks, or even months for things to get back to normal. Tap each step to see what happens.</p></div>
+    <div class="recovery" id="recovery"></div>
+
+    <h3>People who help</h3>
+    <div class="helpers" id="helpers"></div>
+
+    <h3>Taking care of your feelings</h3>
+    <div class="prose">
+      <p>After a hurricane, it is normal to feel scared, sad, worried, or angry. It is also normal to have trouble sleeping. These feelings usually get better with time and support.</p>
+      <p>Tap the things that <strong>help</strong> people feel better after a storm.</p>
+    </div>
+    <div class="panel lab"><div class="lab-body"><div class="feelgame" id="feelGame"></div><div id="feelOut" aria-live="polite"></div></div></div>
+
+    <h3>My recovery plan</h3>
+    <div class="prose"><p>Pick <strong>three</strong> things you would do to help yourself or your family after a hurricane.</p></div>
+    <div class="panel lab"><div class="lab-body"><div class="planpick" id="planPick"></div><p class="note" id="planNote">Pick 3.</p></div></div>
+
+    <div class="mc" data-set="s6"></div>
+    <div class="qs"><h4>✏️ Write it: Part 6</h4><ol>
+      <li data-start="After a hurricane, I will stay safe by…">Name one danger after a hurricane. How will you stay safe from it?</li>
+      <li data-start="If I feel scared or sad after a storm, I can…">If you feel scared or sad after a storm, what can you do? Who could you talk to?</li>
+    </ol></div>
+  </section>
+
+  <!-- S7 -->
+  <section class="block" id="s7" data-sec="s7" style="--c:var(--c5)">
+    <p class="secnum"><i></i>Part 7 of 7</p>
+    <h2 class="sec">Check what you know</h2>
+    <div class="prose"><p class="lede">Answer these questions to show what you learned. You can try again if you miss one.</p></div>
+    <div class="mc" data-set="s7"></div>
+    <div class="qs"><h4>✏️ Write it: Part 7</h4><ol>
+      <li data-start="The most important thing I learned about hurricane safety is…">What is the most important thing you learned today? Why does it matter?</li>
+    </ol></div>
+  </section>
+
+  <!-- SUBMIT -->
+  <section class="block" id="submit" data-sec="submit" style="--c:var(--good)">
+    <p class="secnum"><i></i>Finish</p>
+    <h2 class="sec">My report</h2>
+    <div class="prose"><p>This page saved all your work. Check the list. Then download your report and turn it in on Canvas.</p></div>
+    <h3>Checklist</h3>
+    <ul class="selfcheck prose" id="selfcheck"></ul>
+    <label class="owncheck"><input type="checkbox" id="ownWords"> I did this work myself, in my own words, without AI.</label>
+    <div class="btnrow" style="margin:18px 0 6px"><button class="btn" type="button" id="repDownload">Download my report as a PDF</button></div>
+    <p class="note" id="repMsg" aria-live="polite">Save the PDF. Then upload it to the Day 20 assignment on Canvas.</p>
+    <div class="panel report" id="reportPreview" aria-label="Report preview"></div>
+    <details class="danger"><summary>Start over</summary><p class="note">This erases all your work on this computer.</p><button class="btn warn sm" type="button" id="wipeAll">Erase all my work</button></details>
+    <p class="note" style="margin-top:24px">Storm data: NOAA National Hurricane Center. Coastlines: Natural Earth.</p>
+  </section>
+  </main>
+</div>
+<p class="endquote">“When the storm comes, the ones who prepared have already won.” 🌀</p>
+
+<script>
+const DATA={storms:{},land:[],lakes:[],borders:[],states:[]};
+
+"use strict";
+/* ================= utilities ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const DPR = Math.min(window.devicePixelRatio || 1, 1.75);
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function mphFromKt(kt){ return Math.round(kt * 1.15078 / 5) * 5; }
+function catFromKt(kt){ if (kt < 34) return -1; if (kt < 64) return 0; if (kt < 83) return 1; if (kt < 96) return 2; if (kt < 113) return 3; if (kt < 137) return 4; return 5; }
+function catFromMph(m){ if (m < 39) return -1; if (m < 74) return 0; if (m < 96) return 1; if (m < 111) return 2; if (m < 130) return 3; if (m < 157) return 4; return 5; }
+function catName(c){ return c === -1 ? "Tropical depression" : c === 0 ? "Tropical storm" : "Category " + c; }
+function catShort(c){ return c === -1 ? "TD" : c === 0 ? "TS" : "Cat " + c; }
+function catVar(c){ return ["--td","--ts","--c1","--c2","--c3","--c4","--c5"][c + 1]; }
+function catColor(c){ return PAL[catVar(c)] || "#888"; }
+function catDark(c){ return c >= 3 || c === -1; }
+function haversineMi(a, b){
+  const R = 3958.8, toR = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * toR, dLon = (b.lon - a.lon) * toR;
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * toR) * Math.cos(b.lat * toR) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+function bearingDeg(a, b){
+  const toR = Math.PI / 180;
+  const y = Math.sin((b.lon - a.lon) * toR) * Math.cos(b.lat * toR);
+  const x = Math.cos(a.lat * toR) * Math.sin(b.lat * toR) - Math.sin(a.lat * toR) * Math.cos(b.lat * toR) * Math.cos((b.lon - a.lon) * toR);
+  return (Math.atan2(y, x) / toR + 360) % 360;
+}
+function compass(deg){ return ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round(deg / 22.5) % 16]; }
+function fmtLat(l){ return Math.abs(l).toFixed(1) + "°" + (l >= 0 ? "N" : "S"); }
+function fmtLon(l){ return Math.abs(l).toFixed(1) + "°" + (l <= 0 ? "W" : "E"); }
+function rng(seed){ let s = seed >>> 0 || 1; return () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
+function gauss(r){ let u = 0, v = 0; while (!u) u = r(); while (!v) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+function store(k, v){ try { if (v === undefined) { const x = localStorage.getItem("hsafe:" + k); return x ? JSON.parse(x) : null; } localStorage.setItem("hsafe:" + k, JSON.stringify(v)); } catch (e) { return null; } }
+
+/* ================= student work store ================= */
+const WORK = Object.assign({ name: "", period: "", a: {}, trials: [], kit: [], story: null, own: false }, store("work") || {});
+let _wt = null;
+function saveWork(){ clearTimeout(_wt); _wt = setTimeout(() => { store("work", WORK); }, 250); document.dispatchEvent(new Event("workchange")); }
+
+/* ================= storm data ================= */
+const STORMS = {};
+for (const [k, rows] of Object.entries(DATA.storms)) {
+  STORMS[k] = rows.map(r => {
+    const s = r[0];
+    const t = Date.UTC(+s.slice(0,4), +s.slice(4,6) - 1, +s.slice(6,8), +s.slice(8,10), +s.slice(10,12));
+    return { key: s, t, rec: r[1], st: r[2], lat: r[3], lon: r[4], kt: r[5], mb: r[6] };
+  });
+}
+function fixIndex(name, key){ return STORMS[name].findIndex(p => p.key === key); }
+function interpTrack(pts, t){
+  if (t <= pts[0].t) return { ...pts[0] };
+  for (let i = 1; i < pts.length; i++) {
+    if (pts[i].t >= t) {
+      const a = pts[i - 1], b = pts[i], f = (t - a.t) / (b.t - a.t || 1);
+      return { t, lat: lerp(a.lat, b.lat, f), lon: lerp(a.lon, b.lon, f), kt: lerp(a.kt, b.kt, f), mb: lerp(a.mb, b.mb, f), st: f < .5 ? a.st : b.st };
+    }
+  }
+  return { ...pts[pts.length - 1] };
+}
+function fmtTime(t){ const d = new Date(t); return MONTHS[d.getUTCMonth()] + " " + d.getUTCDate() + ", " + String(d.getUTCHours()).padStart(2, "0") + String(d.getUTCMinutes()).padStart(2, "0") + " UTC"; }
+
+/* ================= theme ================= */
+let PAL = {};
+const themeHooks = [];
+function readPalette(){
+  for (const n of ["--paper","--panel","--ink","--ink-2","--ink-3","--rule","--rule-2","--accent","--warn","--watch","--good","--ocean","--ocean-2","--land","--coast","--grid","--td","--ts","--c1","--c2","--c3","--c4","--c5","--paper-2","--accent-soft"]) PAL[n] = cssVar(n);
+}
+function onTheme(fn){ themeHooks.push(fn); }
+function themeChanged(){ readPalette(); themeHooks.forEach(f => { try { f(); } catch (e) { console.error(e); } }); }
+(function themeSetup(){
+  const btn = $("#themeBtn");
+  let mode = store("theme") || "auto";
+  const apply = () => {
+    if (mode === "auto") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", mode);
+    btn.textContent = "Theme: " + mode;
+    themeChanged();
+  };
+  btn.addEventListener("click", () => { mode = mode === "auto" ? "light" : mode === "light" ? "dark" : "auto"; store("theme", mode); apply(); });
+  if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener("change", themeChanged);
+  readPalette();
+  if (mode !== "auto") document.documentElement.setAttribute("data-theme", mode);
+  btn.textContent = "Theme: " + mode;
+  readPalette();
+})();
+
+/* ================= animation scheduler (only run visible) ================= */
+const loops = new Set();
+function addLoop(el, fn){
+  const L = { el, fn, vis: false };
+  const io = new IntersectionObserver(es => { es.forEach(e => { L.vis = e.isIntersecting; }); }, { rootMargin: "100px" });
+  io.observe(el); loops.add(L); return L;
+}
+let lastT = performance.now();
+function frame(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+  loops.forEach(L => { if (L.vis) L.fn(dt, now / 1000); });
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+function fitCanvas(c, aspect){
+  const w = c.clientWidth || c.parentElement.clientWidth || 600;
+  const h = aspect ? w * aspect : (c.clientHeight || 400);
+  if (aspect) c.style.height = h + "px";
+  c.width = Math.round(w * DPR); c.height = Math.round(h * DPR);
+  const ctx = c.getContext("2d"); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  return { ctx, w, h };
+}
+
+/* ================= storm renderer ================= */
+const IR_STOPS = [[0,"#232323"],[.22,"#8f8f8f"],[.36,"#d0d0d0"],[.45,"#2bd2ff"],[.54,"#1846e0"],[.62,"#19c44a"],[.69,"#f6f63a"],[.76,"#ff8a1a"],[.84,"#e8171d"],[.92,"#6b0a0a"],[1,"#f4f4f4"]];
+function hexToRgb(h){ const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function irColor(v){
+  for (let i = 1; i < IR_STOPS.length; i++) if (v <= IR_STOPS[i][0]) {
+    const [a, ca] = IR_STOPS[i - 1], [b, cb] = IR_STOPS[i], f = (v - a) / (b - a);
+    const A = hexToRgb(ca), B = hexToRgb(cb);
+    return [0,1,2].map(k => Math.round(lerp(A[k], B[k], f)));
+  }
+  return [244,244,244];
+}
+const SPRITES = (() => {
+  const make = rgb => { const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d");
+    const gr = g.createRadialGradient(32,32,0,32,32,32); gr.addColorStop(0,`rgba(${rgb},1)`); gr.addColorStop(.45,`rgba(${rgb},.55)`); gr.addColorStop(1,`rgba(${rgb},0)`);
+    g.fillStyle = gr; g.fillRect(0,0,64,64); return c; };
+  const white = make("255,255,255");
+  const ir = []; for (let i = 0; i < 24; i++) ir.push(make(irColor(i / 23).join(",")));
+  return { white, ir };
+})();
+
+class StormSim {
+  constructor(canvas, o = {}){
+    this.c = canvas; this.o = Object.assign({ n: 1400, scale: .46, cx: .5, cy: .5, bg: "ocean", aspect: null }, o);
+    this.intensity = o.intensity ?? .8; this.org = o.org ?? 1; this.shear = 0; this.mode = "vis"; this.spin = 1; this.coriolis = 1;
+    const r = rng(o.seed || 7);
+    this.blobs = Array.from({ length: 9 }, () => ({ x: (r() - .5) * 1.3, y: (r() - .5) * 1.0, vx: (r() - .5) * .02, vy: (r() - .5) * .02, s: .08 + r() * .14 }));
+    this.p = Array.from({ length: this.o.n }, (_, i) => {
+      const core = i < this.o.n * .28;
+      const rr = core ? Math.pow(r(), .9) * .38 : .08 + Math.pow(r(), .75) * .95;
+      const b = this.blobs[Math.floor(r() * this.blobs.length)];
+      const ba = r() * 6.283, bd = Math.pow(r(), .6) * b.s;
+      return { r: rr, th: r() * 6.283, sz: core ? (.022 + r() * .05) : (.018 + r() * .06) * (0.7 + rr * .9), ph: r() * 6.283, b, bx: Math.cos(ba) * bd, by: Math.sin(ba) * bd, k: r() };
+    });
+    this.resize();
+  }
+  resize(){
+    if (this.o.fixed) { const z = this.o.fixed; this.c.width = this.c.height = z; this.ctx = this.c.getContext("2d"); this.w = this.h = z; return; }
+    const f = fitCanvas(this.c, this.o.aspect); this.ctx = f.ctx; this.w = f.w; this.h = f.h; }
+  step(dt){
+    const om = (.18 + 1.1 * this.intensity) * this.spin * this.coriolis;
+    for (const p of this.p) p.th -= dt * om * (0.25 + 1.2 * Math.exp(-p.r * 3)) / (0.3 + p.r);
+    for (const b of this.blobs) { b.x += b.vx * dt; b.y += b.vy * dt; if (Math.abs(b.x) > .7) b.vx *= -1; if (Math.abs(b.y) > .55) b.vy *= -1; }
+  }
+  draw(t = 0){
+    const { ctx, w, h } = this, o = this.o;
+    const R = Math.min(w, h) * o.scale * (0.75 + 0.35 * this.org), cx = w * o.cx, cy = h * o.cy;
+    if (o.bg === "ocean") {
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * .8);
+      if (this.mode === "ir") { g.addColorStop(0, "#2a2a2a"); g.addColorStop(1, "#1b1b1b"); }
+      else { g.addColorStop(0, "#0b3550"); g.addColorStop(1, "#03111c"); }
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    } else ctx.clearRect(0, 0, w, h);
+    const I = this.intensity, org = this.org, sh = this.shear;
+    const eye = I > .42 ? (.045 + .05 * (1 - I)) : 0;
+    const ir = this.mode === "ir";
+    for (const p of this.p) {
+      const lr = Math.log(p.r + .03);
+      const band = .5 + .5 * Math.cos(3 * (p.th - 2.3 * lr) + p.ph * .15);
+      const bandW = Math.pow(band, 1.6);
+      const ew = eye ? Math.exp(-Math.pow((p.r - eye * 1.9) / (.06 + eye * .5), 2)) : 0;
+      let wgt = lerp(.55 + .45 * Math.sin(p.ph + t * .4), (p.r < .3 ? .85 : bandW) * (1 - .55 * Math.max(0, p.r - .55)), org);
+      wgt += ew * I * 1.2;
+      if (eye) wgt *= smooth(eye * .75, eye * 1.5, p.r);
+      wgt *= 1 - smooth(.78, 1.05, p.r);
+      // positions
+      const sx = Math.cos(p.th) * p.r, sy = Math.sin(p.th) * p.r;
+      const ax = p.b.x + p.bx + Math.sin(t * .7 + p.ph) * .01, ay = p.b.y + p.by;
+      let x = lerp(ax, sx, org), y = lerp(ay, sy, org);
+      let cold = clamp(.28 + .55 * ew * I + .5 * (1 - p.r) * (.3 + .7 * I) * (.4 + .6 * bandW) + (1 - org) * .25 * (p.k), 0, 1);
+      if (sh > 0) { x += sh * cold * .55; wgt *= 1 - sh * .7 * smooth(-.1, -.5, sx); }
+      const a = clamp(wgt * (ir ? .62 : .5), 0, 1);
+      if (a < .015) continue;
+      const s = p.sz * R * (1.1 + 1.2 * (1 - org)) * (eye ? (.45 + .55 * smooth(eye, .4, p.r)) : 1);
+      ctx.globalAlpha = a;
+      const spr = ir ? SPRITES.ir[Math.round(clamp(cold * (.6 + .5 * I), 0, .9) * 23)] : SPRITES.white;
+      ctx.drawImage(spr, cx + x * R - s, cy + y * R - s, s * 2, s * 2);
+    }
+    ctx.globalAlpha = 1;
+    if (eye) { const er = eye * R * 1.25, ex = cx + sh * .2 * R, gr = ctx.createRadialGradient(ex, cy, 0, ex, cy, er);
+      const col = ir ? "35,35,35" : "11,45,66"; gr.addColorStop(0, `rgba(${col},${.95 * smooth(.42, .7, I)})`); gr.addColorStop(.55, `rgba(${col},${.6 * smooth(.42, .7, I)})`); gr.addColorStop(1, `rgba(${col},0)`);
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(ex, cy, er, 0, 7); ctx.fill(); }
+    this.R = R; this.cx = cx; this.cy = cy;
+  }
+}
+
+/* ================= map view ================= */
+const CITIES = [
+  ["Miami",25.77,-80.19],["Tampa",27.95,-82.46],["Fort Myers",26.64,-81.87],["New Orleans",29.95,-90.07],["Houston",29.76,-95.37],
+  ["Corpus Christi",27.8,-97.4],["Mobile",30.69,-88.04],["Panama City",30.16,-85.66],["Charleston",32.78,-79.93],["Wilmington",34.21,-77.89],
+  ["Jacksonville",30.33,-81.66],["Havana",23.11,-82.37],["San Juan",18.47,-66.11],["Brownsville",25.9,-97.5],["Lake Charles",30.23,-93.22],["Norfolk",36.85,-76.29],["Nassau",25.05,-77.35]
+];
+class MapView {
+  constructor(canvas, o){
+    this.c = canvas; this.o = Object.assign({ b: [-100, -55, 8, 40], grid: 5, labels: true, cities: false, minorTicks: false }, o);
+    this.resize(); onTheme(() => { this.base = null; this.onRedraw && this.onRedraw(); });
+  }
+  setBounds(b){ this.o.b = b; this.resize(); }
+  resize(){
+    const [w0, e0, s0, n0] = this.o.b;
+    this.k = Math.cos(((s0 + n0) / 2) * Math.PI / 180);
+    const W = (e0 - w0) * this.k, H = n0 - s0;
+    const cw = this.c.clientWidth || this.c.parentElement.clientWidth || 600;
+    let aspect = H / W;
+    if (this.o.maxAspect) aspect = Math.min(aspect, this.o.maxAspect);
+    if (this.o.minAspect) aspect = Math.max(aspect, this.o.minAspect);
+    const f = fitCanvas(this.c, aspect); this.ctx = f.ctx; this.w = f.w; this.h = f.h;
+    // fit (keeping aspect) and center
+    const sc = Math.min(this.w / W, this.h / H);
+    this.sc = sc; this.ox = (this.w - W * sc) / 2; this.oy = (this.h - H * sc) / 2;
+    this.base = null;
+  }
+  proj(lon, lat){ const [w0, , , n0] = this.o.b; return [this.ox + (lon - w0) * this.k * this.sc, this.oy + (n0 - lat) * this.sc]; }
+  inv(x, y){ const [w0, , , n0] = this.o.b; return { lon: w0 + (x - this.ox) / (this.k * this.sc), lat: n0 - (y - this.oy) / this.sc }; }
+  pxPerMile(){ return this.sc / 69; }
+  buildBase(){
+    const cv = document.createElement("canvas"); cv.width = this.c.width; cv.height = this.c.height;
+    const g = cv.getContext("2d"); g.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const D = this.o.dark ? { "--ocean": "#0b2538", "--ocean-2": "#0e2d44", "--land": "#22323b", "--coast": "#6a8394", "--grid": "rgba(160,200,225,.14)", "--ink-2": "#a3b8c6", "--ink-3": "#7890a0", "--ink": "#e5eef4" } : PAL;
+    const gr = g.createLinearGradient(0, 0, 0, this.h); gr.addColorStop(0, D["--ocean-2"]); gr.addColorStop(1, D["--ocean"]);
+    g.fillStyle = gr; g.fillRect(0, 0, this.w, this.h);
+    const poly = (arr) => { g.beginPath(); for (let i = 0; i < arr.length; i += 2) { const [x, y] = this.proj(arr[i], arr[i + 1]); i ? g.lineTo(x, y) : g.moveTo(x, y); } g.closePath(); };
+    g.fillStyle = D["--land"]; g.strokeStyle = D["--coast"]; g.lineWidth = 0.9;
+    for (const p of DATA.land) { poly(p); g.fill(); g.stroke(); }
+    g.fillStyle = D["--ocean"]; for (const p of DATA.lakes) { poly(p); g.fill(); g.stroke(); }
+    g.strokeStyle = D["--coast"]; g.globalAlpha = .55; g.lineWidth = .7; g.setLineDash([3, 3]);
+    for (const l of DATA.borders.concat(DATA.states)) { g.beginPath(); for (let i = 0; i < l.length; i += 2) { const [x, y] = this.proj(l[i], l[i + 1]); i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); }
+    g.setLineDash([]); g.globalAlpha = 1;
+    // grid
+    const [w0, e0, s0, n0] = this.o.b, st = this.o.grid;
+    g.strokeStyle = D["--grid"]; g.lineWidth = 1; g.fillStyle = D["--ink-2"]; g.font = "600 11.5px Archivo, system-ui, sans-serif";
+    for (let lon = Math.ceil(w0 / st) * st; lon <= e0; lon += st) { const [x] = this.proj(lon, 0); g.beginPath(); g.moveTo(x, 0); g.lineTo(x, this.h); g.stroke(); if (this.o.labels) { g.textAlign = "center"; g.fillText(Math.abs(lon) + "°W", x, this.h - 6); } }
+    for (let lat = Math.ceil(s0 / st) * st; lat <= n0; lat += st) { const [, y] = this.proj(0, lat); g.beginPath(); g.moveTo(0, y); g.lineTo(this.w, y); g.stroke(); if (this.o.labels) { g.textAlign = "left"; g.fillText(lat + "°N", 5, y - 4); } }
+    if (this.o.minorTicks) {
+      g.strokeStyle = D["--ink-3"]; g.globalAlpha = .5;
+      for (let lon = Math.ceil(w0); lon <= e0; lon++) { const [x] = this.proj(lon, 0); for (let lat = Math.ceil(s0 / st) * st; lat <= n0; lat += st) { const [, y] = this.proj(0, lat); g.beginPath(); g.moveTo(x, y - 3); g.lineTo(x, y + 3); g.stroke(); } }
+      for (let lat = Math.ceil(s0); lat <= n0; lat++) { const [, y] = this.proj(0, lat); for (let lon = Math.ceil(w0 / st) * st; lon <= e0; lon += st) { const [x] = this.proj(lon, 0); g.beginPath(); g.moveTo(x - 3, y); g.lineTo(x + 3, y); g.stroke(); } }
+      g.globalAlpha = 1;
+    }
+    if (this.o.cities) {
+      g.font = "500 11px Archivo, system-ui, sans-serif"; g.textAlign = "left";
+      for (const [n, la, lo] of CITIES) { if (lo < w0 || lo > e0 || la < s0 || la > n0) continue; const [x, y] = this.proj(lo, la); g.fillStyle = D["--ink"]; g.beginPath(); g.arc(x, y, 2.2, 0, 7); g.fill(); g.fillStyle = D["--ink-2"]; g.fillText(n, x + 4, y - 3); }
+    }
+    this.base = cv;
+  }
+  drawBase(){ if (!this.base) this.buildBase(); this.ctx.setTransform(1, 0, 0, 1, 0, 0); this.ctx.drawImage(this.base, 0, 0); this.ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  track(pts, o = {}){
+    const g = this.ctx, lw = o.lw || 2.6;
+    g.lineCap = "round"; g.lineJoin = "round";
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i]; const [x1, y1] = this.proj(a.lon, a.lat), [x2, y2] = this.proj(b.lon, b.lat);
+      g.strokeStyle = o.color || catColor(catFromKt(b.kt)); g.lineWidth = lw; g.globalAlpha = o.alpha ?? 1;
+      if (o.dash) g.setLineDash(o.dash);
+      g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
+    }
+    g.setLineDash([]); g.globalAlpha = 1;
+    if (o.dots !== false) for (const p of pts) {
+      if (o.dotsEvery && !(p.key && /(0000|0600|1200|1800)$/.test(p.key))) continue;
+      const [x, y] = this.proj(p.lon, p.lat);
+      g.fillStyle = catColor(catFromKt(p.kt)); g.strokeStyle = PAL["--ink"]; g.lineWidth = 1;
+      g.beginPath(); g.arc(x, y, o.r || 3.6, 0, 7); g.fill(); g.stroke();
+    }
+  }
+  glyph(lon, lat, kt, t, size){
+    const g = this.ctx, [x, y] = this.proj(lon, lat), c = catFromKt(kt), s = size || 10 + Math.max(0, c) * 1.6;
+    g.save(); g.translate(x, y); g.rotate(-t * 3);
+    g.fillStyle = catColor(c); g.strokeStyle = PAL["--ink"]; g.lineWidth = 1.4;
+    g.beginPath();
+    g.arc(0, 0, s * .42, 0, 7);
+    g.moveTo(s * .42, 0); g.quadraticCurveTo(s * .9, -s * .1, s * 1.05, -s * .8);
+    g.moveTo(-s * .42, 0); g.quadraticCurveTo(-s * .9, s * .1, -s * 1.05, s * .8);
+    g.stroke(); g.beginPath(); g.arc(0, 0, s * .42, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = PAL["--ink"]; g.beginPath(); g.arc(0, 0, s * .12, 0, 7); g.fill();
+    g.restore();
+  }
+  pin(lon, lat, color, label){
+    const g = this.ctx, [x, y] = this.proj(lon, lat);
+    g.fillStyle = color; g.strokeStyle = PAL["--panel"]; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(x, y); g.bezierCurveTo(x - 10, y - 12, x - 9, y - 24, x, y - 24); g.bezierCurveTo(x + 9, y - 24, x + 10, y - 12, x, y); g.fill(); g.stroke();
+    g.fillStyle = PAL["--panel"]; g.beginPath(); g.arc(x, y - 16, 3.5, 0, 7); g.fill();
+    if (label) { g.font = "650 12px Archivo, system-ui, sans-serif"; g.textAlign = "left"; const tw = g.measureText(label).width;
+      g.fillStyle = PAL["--panel"]; g.globalAlpha = .9; g.fillRect(x + 8, y - 30, tw + 10, 18); g.globalAlpha = 1; g.fillStyle = color; g.fillText(label, x + 13, y - 17); }
+  }
+  ring(lon, lat, color, r = 10){ const g = this.ctx, [x, y] = this.proj(lon, lat); g.strokeStyle = color; g.lineWidth = 2.5; g.beginPath(); g.arc(x, y, r, 0, 7); g.stroke(); }
+  bindPointer(cb){
+    const get = e => { const rc = this.c.getBoundingClientRect(); return this.inv(e.clientX - rc.left, e.clientY - rc.top); };
+    this.c.addEventListener("pointermove", e => cb("move", get(e), e));
+    this.c.addEventListener("pointerdown", e => cb("down", get(e), e));
+    this.c.addEventListener("pointerup", e => cb("up", get(e), e));
+    this.c.addEventListener("pointerleave", e => cb("leave", null, e));
+  }
+}
+
+/* ================= hero ================= */
+(function hero(){
+  const c = $("#heroCanvas"), heroEl = $("#hero");
+  const sim = new StormSim(c, { n: 3200, scale: .5, cx: .66, cy: .44, intensity: .05, org: 0, seed: 11 });
+  let t0 = null;
+  const onR = () => { sim.resize(); if (REDUCED) { sim.intensity = .9; sim.org = 1; sim.draw(0); } };
+  window.addEventListener("resize", onR);
+  if (window.innerWidth < 760) { sim.o.cx = .55; sim.o.cy = .32; sim.o.scale = .62; }
+  if (REDUCED) { sim.intensity = .9; sim.org = 1; sim.draw(0); }
+  addLoop(heroEl, (dt, t) => {
+    if (REDUCED) return;
+    if (t0 === null) t0 = t;
+    const e = smooth(0, 5.5, t - t0); // single spin-up moment on load
+    sim.org = e; sim.intensity = .05 + .87 * e;
+    sim.step(dt); sim.draw(t);
+  });
+  $$(".hero .mode button").forEach(b => b.addEventListener("click", () => {
+    $$(".hero .mode button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    sim.mode = b.dataset.mode; heroEl.classList.toggle("ir", sim.mode === "ir");
+    $("#irNote").style.display = sim.mode === "ir" ? "block" : "none";
+    if (REDUCED) sim.draw(0);
+  }));
+})();
+
+/* ================= navigation rail & top bar ================= */
+(function nav(){
+  const secs = $$("section[data-sec]"), items = $$("#railList li"), top = $("#topbar"), where = $("#where"), line = $("#progLine");
+  const names = { start: "Start here", s1: "1. What is a hurricane?", s2: "2. What will I see and feel?", s3: "3. Watch or warning?", s4: "4. Get ready and stay safe", s5: "5. Make the right choice", s6: "6. After the storm", s7: "7. Check what you know", submit: "My report" };
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => { if (e.isIntersecting) {
+      const id = e.target.dataset.sec; let seen = true;
+      items.forEach(li => { const on = li.dataset.sec === id; li.classList.toggle("on", on); if (on) seen = false; li.classList.toggle("done", seen); });
+      where.textContent = names[id] || "";
+    } });
+  }, { rootMargin: "-45% 0px -50% 0px" });
+  secs.forEach(s => io.observe(s));
+  const onScroll = () => {
+    top.classList.toggle("show", window.scrollY > window.innerHeight * .6);
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    line.style.transform = `scaleX(${clamp(window.scrollY / max, 0, 1)})`;
+  };
+  window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
+})();
+
+/* ================= Section 1: cross-section ================= */
+(function xsec(){
+  const svg = $("#xsec");
+  const info = {
+    eye: ["Eye", "The calm center of the storm. The wind is light and the sky may be clear. But strong wind is all around it."],
+    eyewall: ["Eyewall", "A ring of the tallest, strongest storms around the eye. This is where the wind is the strongest and the rain is the heaviest."],
+    bands: ["Rain bands", "Long, curved lines of storms that spin around the center. They bring bursts of heavy rain and strong gusts of wind."],
+    inflow: ["Air pulled in", "Near the ocean, air is pulled toward the center. It picks up heat and water from the warm sea. This feeds the storm."],
+    outflow: ["Air pushed out", "At the top of the storm, air spreads out, like smoke coming out of a chimney."],
+    ocean: ["Warm ocean", "The storm’s fuel. The water must be warmer than about 80°F. Warm water turns into water vapor that feeds the storm."],
+    heat: ["Heat released", "When water vapor turns into rain, it gives off heat. The heat makes the air rise faster, and the storm grows stronger."]
+  };
+  const cloud = (x, w, h, id) => {
+    const y = 330 - h; let d = `M${x - w / 2} 330 `;
+    const n = Math.max(3, Math.round(w / 26));
+    for (let i = 0; i <= n; i++) { const px = x - w / 2 + (w / n) * i; const py = y + (i % 2 ? 10 : 0) + (i === 0 || i === n ? h * .35 : 0); d += `Q${px - w / n / 2} ${py - 18} ${px} ${py} `; }
+    return `<path d="${d} L${x + w / 2} 330 Z" class="cl" data-k="${id}"/>`;
+  };
+  let h = `<defs>
+    <linearGradient id="xsSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1d2c"/><stop offset="1" stop-color="#21435c"/></linearGradient>
+    <linearGradient id="xsSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c7aa0"/><stop offset="1" stop-color="#0b3550"/></linearGradient>
+    <marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#ffd166"/></marker>
+    <marker id="ahb" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#9fe3ff"/></marker>
+  </defs>
+  <style>
+    #xsec .cl{fill:#d3e0e9;cursor:pointer;transition:fill .2s}
+    #xsec .cl:hover,#xsec .cl.sel{fill:#ffffff}
+    #xsec .fl{fill:none;stroke-width:3;stroke-dasharray:10 8;animation:xsdash 1.4s linear infinite}
+    #xsec .up{stroke:#ffd166}#xsec .dn{stroke:#9fe3ff;animation-direction:reverse}
+    #xsec .hit{fill:transparent;cursor:pointer}
+    #xsec .lbl{font:650 15px Archivo,system-ui,sans-serif;fill:#eaf3f8;cursor:pointer}
+    #xsec .lblbg{fill:rgba(3,16,26,.72);cursor:pointer}
+    #xsec .sel+.lbl, #xsec .lbl.sel{fill:#ffd166}
+    #xsec .spark{fill:#ffb703;animation:xsspark 2.2s ease-in-out infinite}
+    #xsec .vap{fill:none;stroke:#bfe9ff;stroke-width:2;opacity:.7;animation:xsrise 2.6s linear infinite}
+    @keyframes xsdash{to{stroke-dashoffset:-36}}
+    @keyframes xsspark{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1)}}
+    @keyframes xsrise{0%{transform:translateY(8px);opacity:0}30%{opacity:.8}100%{transform:translateY(-26px);opacity:0}}
+  </style>
+  <rect width="900" height="420" fill="url(#xsSky)"/>`;
+  // clouds built from puffs so they read as cumulonimbus towers
+  const R9 = rng(42);
+  const puffs = (poly, edge, k) => { let o = `<g class="cl" data-k="${k}"><path d="M${poly.map(p => p.join(" ")).join(" L")} Z"/>`;
+    for (let i = 0; i < edge.length - 1; i++) { const [x1, y1] = edge[i], [x2, y2] = edge[i + 1], n = Math.max(1, Math.round(Math.hypot(x2 - x1, y2 - y1) / 18));
+      for (let j = 0; j < n; j++) { const f = j / n; o += `<circle cx="${(lerp(x1, x2, f)).toFixed(1)}" cy="${(lerp(y1, y2, f)).toFixed(1)}" r="${(14 + R9() * 12).toFixed(1)}"/>`; } }
+    return o + `</g>`; };
+  const band = (x, w, hh) => { const t = 330 - hh; return puffs([[x - w / 2, 330], [x - w / 2 + 8, t + 20], [x + w / 2 - 8, t + 20], [x + w / 2, 330]], [[x - w / 2 + 6, 320], [x - w / 2 + 8, t + 20], [x - w / 4, t + 6], [x + w / 4, t + 4], [x + w / 2 - 8, t + 20], [x + w / 2 - 6, 320]], "bands"); };
+  [[90, 90, 110], [205, 80, 150], [695, 80, 150], [810, 90, 110]].forEach(([x, w, hh]) => h += band(x, w, hh));
+  h += puffs([[300, 330], [326, 90], [402, 80], [418, 330]], [[302, 320], [308, 250], [314, 180], [322, 120], [334, 86], [370, 74], [402, 80]], "eyewall");
+  h += puffs([[600, 330], [574, 90], [498, 80], [482, 330]], [[598, 320], [592, 250], [586, 180], [578, 120], [566, 86], [530, 74], [498, 80]], "eyewall");
+  // anvil / outflow shield
+  h += `<path class="cl" data-k="outflow" d="M150 92 Q300 40 330 58 Q450 30 570 58 Q600 40 750 92 Q620 80 570 75 L330 75 Q280 80 150 92Z" opacity=".9"/>`;
+  // eye hit zone
+  h += `<rect class="hit" data-k="eye" x="420" y="66" width="60" height="264"/>`;
+  // flows
+  h += `<path class="fl dn" d="M450 90 L450 300" marker-end="url(#ahb)"/>`;
+  h += `<path class="fl up" d="M335 315 C340 220 352 150 365 90" marker-end="url(#ah)"/><path class="fl up" d="M565 315 C560 220 548 150 535 90" marker-end="url(#ah)"/>`;
+  h += `<path class="fl up" d="M370 66 Q260 50 140 84" marker-end="url(#ah)"/><path class="fl up" d="M530 66 Q640 50 760 84" marker-end="url(#ah)"/>`;
+  h += `<path class="fl up" d="M30 340 L310 340" marker-end="url(#ah)" data-k="inflow"/><path class="fl up" d="M870 340 L590 340" marker-end="url(#ah)" data-k="inflow"/>`;
+  // sea
+  h += `<path data-k="ocean" style="cursor:pointer" fill="url(#xsSea)" d="M0 352 Q 37.5 344 75 352 T150 352 T225 352 T300 352 T375 352 T450 352 T525 352 T600 352 T675 352 T750 352 T825 352 T900 352 V420 H0Z"/>`;
+  for (let i = 0; i < 14; i++) { const x = 30 + i * 64 + (i % 2) * 10; h += `<path class="vap" style="animation-delay:${(i * .37) % 2.6}s" d="M${x} 352 q4 -6 0 -12 q-4 -6 0 -12"/>`; }
+  // sparks (latent heat)
+  [[338,250],[352,180],[362,120],[560,240],[548,170],[540,115],[205,240],[695,235]].forEach(([x, y], i) => h += `<circle class="spark" data-k="heat" style="transform-origin:${x}px ${y}px;animation-delay:${i * .27}s;cursor:pointer" cx="${x}" cy="${y}" r="5"/>`);
+  // labels
+  const lab = (x, y, t, k) => `<g data-k="${k}"><rect class="lblbg" x="${x - 6}" y="${y - 16}" rx="6" width="${t.length * 8.2 + 12}" height="23"/><text class="lbl" x="${x}" y="${y}">${t}</text></g>`;
+  h += lab(424, 210, "Eye", "eye") + lab(250, 300, "Eyewall", "eyewall") + lab(40, 250, "Rain bands", "bands") + lab(40, 330, "Air pulled in", "inflow") + lab(600, 28, "Air pushed out", "outflow") + lab(720, 400, "Warm ocean (80°F+)", "ocean") + lab(575, 190, "Heat released", "heat");
+  svg.innerHTML = h;
+  const sel = k => {
+    $$("#xsec .cl, #xsec .spark").forEach(el => el.classList.toggle("sel", el.dataset.k === k));
+    $$("#xsec g[data-k] text").forEach(el => el.classList.toggle("sel", el.parentNode.dataset.k === k));
+    $("#xsecInfo").innerHTML = `<p><strong>${info[k][0]}.</strong> ${info[k][1]}</p>`;
+  };
+  svg.addEventListener("click", e => { const t = e.target.closest("[data-k]"); if (t) sel(t.dataset.k); });
+  sel("eyewall");
+})();
+
+
+/* ================= Section 3: beach town ================= */
+(function beach(){
+  const svg = $("#beach"), G = 330, PX = 8, SL = G + 14; // ground y, px per foot, normal sea level
+  const surgeOf = m => { const k = [[0,0],[24,0],[38,1],[39,1.5],[73,3],[74,4],[95,5],[96,6],[110,8],[111,9],[129,12],[130,13],[156,18],[157,19],[185,22]];
+    for (let i = 1; i < k.length; i++) if (m <= k[i][0]) return lerp(k[i-1][1], k[i][1], (m - k[i-1][0]) / (k[i][0] - k[i-1][0])); return 22; };
+  const surgeTxt = ["0 ft (normal)", "Up to 1 ft", "1 to 3 ft", "4 to 5 ft", "6 to 8 ft", "9 to 12 ft", "13 to 18 ft", "More than 18 ft"];
+  const dmg = ["Nothing. A normal day at the beach.", "Gusty wind and heavy rain. Some flooding.", "Branches fall. Loose things blow around.", "Some roof damage. Power goes out.", "Many trees break. Power is out for most people.", "Homes are badly damaged. No power or water for days or weeks.", "Most trees fall. Many homes are destroyed.", "Almost everything is destroyed. No one can live here for weeks or months."];
+  const palm = (x, id) => `<g id="${id}" transform="translate(${x} ${G})"><g class="sway"><path d="M0 0 Q4 -60 -2 -120" stroke="#6b4f2e" stroke-width="7" fill="none"/>
+    <g class="fronds" transform="translate(-2 -120)"><path d="M0 0 q-30 -10 -55 8 M0 0 q-28 -24 -50 -22 M0 0 q30 -12 55 6 M0 0 q26 -26 48 -24 M0 0 q-4 -28 6 -42" stroke="#2f7d4a" stroke-width="6" fill="none" stroke-linecap="round"/></g></g></g>`;
+  const house = (x, w, hh, id, col) => `<g id="${id}" transform="translate(${x} ${G})"><g class="walls"><rect x="0" y="${-hh}" width="${w}" height="${hh}" fill="${col}" stroke="#4b5a63" stroke-width="1.5"/>
+    <rect class="win" x="${w * .15}" y="${-hh * .72}" width="${w * .2}" height="${hh * .28}" fill="#9fd3ef" stroke="#4b5a63"/><rect class="win" x="${w * .62}" y="${-hh * .72}" width="${w * .2}" height="${hh * .28}" fill="#9fd3ef" stroke="#4b5a63"/>
+    ${hh > 120 ? `<rect class="win" x="${w * .15}" y="${-hh * .38}" width="${w * .2}" height="${hh * .22}" fill="#9fd3ef" stroke="#4b5a63"/><rect x="${w * .62}" y="${-hh * .38}" width="${w * .2}" height="${hh * .38}" fill="#7a5233"/>` : `<rect x="${w * .42}" y="${-hh * .5}" width="${w * .16}" height="${hh * .5}" fill="#7a5233"/>`}
+    <path class="crack" d="M${w * .2} ${-hh * .7} l10 12 l-6 8 l12 10" stroke="#222" stroke-width="2" fill="none" opacity="0"/></g>
+    <g class="roof" style="transform-origin:${w / 2}px ${-hh}px"><path d="M-12 ${-hh} L${w / 2} ${-hh - 48} L${w + 12} ${-hh} Z" fill="#8a3b2e" stroke="#4b2a22" stroke-width="1.5"/>
+    <path class="shingle" d="M${w * .2} ${-hh - 14} l22 -4 l2 10 l-20 4z M${w * .62} ${-hh - 22} l18 -3 l2 10 l-18 3z" fill="#d9c7a7"/></g></g>`;
+  let h = `<defs><linearGradient id="bSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" id="bS0" stop-color="#7fb6d8"/><stop offset="1" id="bS1" stop-color="#cfe4ef"/></linearGradient>
+    <linearGradient id="bSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a7fa8"/><stop offset="1" stop-color="#0e4766"/></linearGradient>
+    <linearGradient id="bSurgeG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d8fb5" stop-opacity=".88"/><stop offset="1" stop-color="#0d3f5c" stop-opacity=".95"/></linearGradient></defs>
+    <rect width="900" height="420" fill="url(#bSky)"/><circle id="bSun" cx="800" cy="70" r="30" fill="#ffd166"/>
+    <g id="bClouds" opacity=".9" fill="#5b6b78">${[0,1,2,3,4,5].map(i => `<ellipse cx="${i * 170}" cy="${40 + (i % 3) * 22}" rx="${90 + (i % 2) * 40}" ry="22"/>`).join("")}</g>
+    <rect x="0" y="${G}" width="900" height="${420 - G}" fill="#d8c79c"/><rect x="0" y="${G}" width="900" height="6" fill="#bfae83"/>
+    <path id="bSea0" d="M0 ${G + 14} H250 V420 H0Z" fill="url(#bSea)"/>
+    <rect x="248" y="${G - 14}" width="16" height="${14 + 90}" fill="#9a9a90"/>
+    ${palm(330, "p1")}${palm(520, "p2")}${palm(770, "p3")}
+    ${house(380, 120, 96, "h1", "#f2e6c9")}${house(590, 140, 176, "h2", "#cfe0d6")}
+    <g id="pole" transform="translate(860 ${G})"><g class="pl"><rect x="-4" y="-150" width="8" height="150" fill="#6b4f2e"/><rect x="-26" y="-146" width="52" height="5" fill="#6b4f2e"/></g></g>
+    <path id="wire" d="M856 ${G - 146} Q 790 ${G - 120} 740 ${G - 150}" stroke="#222" stroke-width="2" fill="none"/>
+    <g id="person" transform="translate(500 ${G})"><circle cx="0" cy="-43" r="5.5" fill="#22313b"/><path d="M0 -37 V-16 M0 -16 L-6 0 M0 -16 L6 0 M0 -30 L-8 -20 M0 -30 L8 -20" stroke="#22313b" stroke-width="4" stroke-linecap="round"/><text x="10" y="-40" font-size="11" font-family="Archivo,system-ui" fill="#22313b">6 ft person</text></g>
+
+    <path id="surge" fill="url(#bSurgeG)" d=""/>
+    <g id="rain" stroke="#dfeaf1" stroke-width="1.3" opacity=".6"></g>
+    <g id="ruler" style="paint-order:stroke;stroke-linejoin:round" transform="translate(276 ${SL})">${Array.from({ length: 26 }, (_, i) => `<line x1="0" x2="${i % 5 ? 6 : 14}" y1="${-i * PX}" y2="${-i * PX}" stroke="#22313b" stroke-width="1.5"/>${i % 5 === 0 && i ? `<text x="16" y="${-i * PX + 4}" font-size="11" font-weight="700" font-family="Archivo,system-ui" fill="#22313b" stroke="#fff" stroke-width="3">${i} ft</text>` : ""}`).join("")}<line x1="0" x2="0" y1="0" y2="${-25 * PX}" stroke="#22313b" stroke-width="2"/><text x="16" y="4" font-size="11" font-weight="700" font-family="Archivo,system-ui" fill="#22313b" stroke="#fff" stroke-width="3">0 ft = normal sea level</text></g>
+    <g id="marks"></g>
+    <g transform="translate(16 26)"><rect id="bLabelBg" width="200" height="30" rx="8" fill="rgba(0,0,0,.55)"/><text id="bLabel" x="12" y="20" font-size="15" font-weight="700" font-family="Archivo,system-ui" fill="#fff">Normal day · calm</text></g>`;
+  svg.innerHTML = h;
+  const rain = $("#rain"); let rl = ""; const rr = rng(9); for (let i = 0; i < 110; i++) rl += `<line x1="${rr() * 1000 - 50}" y1="${rr() * 400}" x2="0" y2="0"/>`; rain.innerHTML = rl;
+  const rlines = $$("line", rain).map(l => ({ l, x: +l.getAttribute("x1"), y: +l.getAttribute("y1"), s: .6 + rr() * .6 }));
+  let mph = 0, cat = -2;
+  const lvl = v => v < 25 ? -2 : catFromMph(v); // -2 normal, -1 TD, 0 TS, 1-5
+  const lname = c => c === -2 ? "Normal day" : c === -1 ? "Tropical depression" : c === 0 ? "Tropical storm" : "Category " + c;
+  const marks = [];
+  const drawMarks = () => {
+    $("#marks").innerHTML = marks.map((m, i) => { const y = SL - m.ft * PX, col = m.c >= 1 ? catColor(m.c) : m.c === 0 ? PAL["--ts"] : "#ffffff";
+      return `<line x1="230" x2="900" y1="${y}" y2="${y}" stroke="${col}" stroke-width="2.5" stroke-dasharray="8 5"/><rect x="${720 - (i % 2) * 150}" y="${y - 19}" width="140" height="17" rx="4" fill="rgba(0,0,0,.65)"/><text x="${726 - (i % 2) * 150}" y="${y - 6}" font-size="11.5" font-weight="700" font-family="Archivo,system-ui" fill="${col}">${m.label}: ${m.ft.toFixed(1)} ft</text>`; }).join("");
+  };
+  $("#markBtn").addEventListener("click", () => {
+    const label = cat === -2 ? "Normal" : cat === -1 ? "Trop. depression" : cat === 0 ? "Trop. storm" : "Cat " + cat + " (" + mph + " mph)";
+    const ft = surgeOf(mph); const ex = marks.findIndex(m => m.label === label); if (ex >= 0) marks.splice(ex, 1);
+    marks.push({ label, ft, c: cat }); if (marks.length > 7) marks.shift(); drawMarks();
+  });
+  $("#markClear").addEventListener("click", () => { marks.length = 0; drawMarks(); });
+  onTheme(drawMarks);
+  const set = v => {
+    mph = v; cat = lvl(v);
+    $("#windSVal").textContent = v < 5 ? "Calm" : v + " mph"; $("#windS").value = v;
+    $("#bCat").textContent = lname(cat); $("#bCat").style.color = cat >= 1 ? catColor(cat) : "";
+    $("#bSurge").textContent = surgeTxt[cat + 2]; $("#bDmg").textContent = dmg[cat + 2];
+    $("#bLabel").textContent = lname(cat) + " · " + (v < 5 ? "calm" : v + " mph");
+    $$("#beachPresets button").forEach(b => b.setAttribute("aria-pressed", lvl(+b.dataset.w) === cat));
+    $$("#ssTable tbody tr").forEach(tr => tr.classList.toggle("hl", +tr.dataset.c === cat));
+    // damage states
+    [["#h1", 96], ["#h2", 176]].forEach(([id, hh], k) => {
+      const hs = $(id), roof = $(".roof", hs);
+      $$(".shingle", hs).forEach(s => s.style.opacity = cat >= 1 ? 1 : 0);
+
+      roof.style.transition = "transform .6s, opacity .6s";
+      roof.style.transform = cat >= 4 ? `translate(${60 + k * 20}px,-${70 + k * 10}px) rotate(${-25 - k * 8}deg)` : cat === 3 ? "rotate(-6deg) translateY(-6px)" : "none";
+      roof.style.opacity = cat >= 4 ? (cat === 5 ? 0 : .55) : 1;
+      $(".crack", hs).style.opacity = cat >= 3 ? 1 : 0;
+      $$(".win", hs).forEach(wn => wn.setAttribute("fill", cat >= 3 ? "#59656c" : "#9fd3ef"));
+      $(".walls", hs).style.transition = "transform .6s"; $(".walls", hs).style.transformOrigin = "0 0";
+      $(".walls", hs).style.transform = cat === 5 ? `skewX(${k ? -8 : 10}deg)` : "none";
+    });
+    $("#wire").setAttribute("d", cat >= 2 ? `M856 ${G - 146} Q 820 ${G - 20} 760 ${G - 2}` : `M856 ${G - 146} Q 790 ${G - 120} 740 ${G - 150}`);
+    const k = smooth(0, 185, v);
+    $("#bS0").setAttribute("stop-color", `rgb(${Math.round(lerp(127, 38, k))},${Math.round(lerp(182, 48, k))},${Math.round(lerp(216, 58, k))})`);
+    $("#bS1").setAttribute("stop-color", `rgb(${Math.round(lerp(207, 90, k))},${Math.round(lerp(228, 104, k))},${Math.round(lerp(239, 112, k))})`);
+  };
+  let surgeNow = 0;
+  addLoop(svg, (dt, t) => {
+    const target = surgeOf(mph); surgeNow += (target - surgeNow) * Math.min(1, dt * 2.5);
+    const yy = SL - surgeNow * PX; let d = `M0 ${yy} `;
+    for (let x = 0; x <= 900; x += 30) d += `L${x} ${yy + Math.sin(x / 40 + t * 3) * (1.5 + surgeNow * .4)} `;
+    $("#surge").setAttribute("d", d + "L900 420 L0 420Z");
+    $("#surge").style.opacity = surgeNow > .05 ? 1 : 0;
+    const k = smooth(0, 185, mph), ang = 2 + k * 46;
+    $$(".sway").forEach((s, i) => { const a = ang * .45 + Math.sin(t * (2 + k * 5) + i) * (2 + k * 7); s.setAttribute("transform", `rotate(${a})`); });
+    $$(".fronds").forEach((f, i) => f.style.opacity = (mph > 130 && i !== 1) ? .25 : 1);
+    $(".pl").setAttribute("transform", `rotate(${mph >= 96 ? 14 : 0})`);
+    const ax = Math.tan((15 + k * 55) * Math.PI / 180), len = 14 + k * 20;
+    for (const r of rlines) { r.y += (380 + k * 500) * r.s * dt; r.x += (380 + k * 500) * r.s * dt * ax; if (r.y > 420) { r.y = -20; r.x = Math.random() * 1000 - 250; } if (r.x > 920) r.x -= 1000;
+      r.l.setAttribute("x1", r.x); r.l.setAttribute("y1", r.y); r.l.setAttribute("x2", r.x - len * ax); r.l.setAttribute("y2", r.y - len); }
+    $("#bSun").setAttribute("opacity", 1 - smooth(5, 45, mph)); $("#rain").setAttribute("opacity", smooth(15, 60, mph) * (.25 + k * .6));
+    const cg = Math.round(lerp(250, 91, smooth(10, 90, mph)));
+    $("#bClouds").setAttribute("fill", `rgb(${cg},${Math.round(lerp(252, 107, smooth(10, 90, mph)))},${Math.round(lerp(255, 120, smooth(10, 90, mph)))})`);
+    $("#bClouds").setAttribute("transform", `translate(${(t * (20 + k * 120)) % 170 - 170} 0)`);
+  });
+  $("#windS").addEventListener("input", e => set(+e.target.value));
+  $$("#beachPresets button").forEach(b => b.addEventListener("click", () => set(+b.dataset.w)));
+  set(0);
+})();
+
+
+/* ================= Section 4: countdown ================= */
+(function countdown(){
+  const c = $("#cdCanvas"); let hrs = 72;
+  const phases = [
+    { min: 49, max: 96, badge: ["none", "No alerts yet"], head: "The storm is far away over the ocean.", list: ["Listen to the news or a weather app each day", "Find out if your home is in a flood zone", "Check your go-kit"] },
+    { min: 37, max: 48, badge: ["watch", "Hurricane watch"], head: "The storm might come. Get ready.", list: ["Pack your go-kit: water, food, medicine, flashlight", "Charge phones and power banks", "Make a plan: where will you go if you need to leave?", "Bring in outside things like chairs and trash cans"] },
+    { min: 13, max: 36, badge: ["warning", "Hurricane warning"], head: "The storm is coming. Act now.", list: ["If leaders say leave, leave right away", "Tell family where you will be", "If you stay, set up your safe room"] },
+    { min: 1, max: 12, badge: ["warning", "Hurricane warning"], head: "Strong wind is starting. It is too late to drive away.", list: ["Go to your safe room, away from windows", "Keep a radio or phone on for news", "Stay inside"] },
+    { min: -6, max: 0, badge: ["storm", "Storm hits"], head: "The worst of the storm is here.", list: ["Stay in your safe room", "If it gets calm, stay inside. It is the eye. More storm is coming", "If water comes inside, go to a higher floor"] },
+    { min: -24, max: -7, badge: ["after", "After the storm"], head: "The storm has passed. Dangers are still around.", list: ["Wait until adults or leaders say it is safe", "Stay away from floodwater and fallen power lines", "Generators must stay outside", "Text instead of calling so phone lines stay open"] }
+  ];
+  const draw = () => {
+    const { ctx: g, w, h } = fitCanvas(c, Math.min(.2, 150 / Math.max(300, c.clientWidth)) * (c.clientWidth < 600 ? 1.6 : 1));
+    g.clearRect(0, 0, w, h);
+    const L = 14, R = w - 26, X = v => L + (96 - v) / 120 * (R - L), barY = h - 34;
+    const segs = [[96, 48, PAL["--rule"]], [48, 36, PAL["--watch"]], [36, 0, PAL["--warn"]], [0, -6, "#5b2a86"], [-6, -24, PAL["--good"]]];
+    segs.forEach(([a, b, col]) => { g.fillStyle = col; g.fillRect(X(a), barY, X(b) - X(a) - 1, 12); });
+    g.fillStyle = PAL["--ink-2"]; g.font = "600 11.5px Archivo,system-ui"; g.textAlign = "center";
+    (w < 520 ? [96, 48, 24, 0, -24] : [96, 72, 48, 36, 24, 12, 0, -12, -24]).forEach(v => g.fillText(v === 0 ? "Storm hits" : v > 0 ? v + "h" : "+" + (-v) + "h", X(v), barY + 28));
+    // TS winds marker
+    g.strokeStyle = PAL["--ink"]; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(X(12), 6); g.lineTo(X(12), barY); g.stroke(); g.setLineDash([]);
+    g.textAlign = "left"; g.fillStyle = PAL["--ink-2"]; g.fillText("Strong wind starts", X(12) + 5, 16);
+    // coast scene: storm moving toward coast at x = X(0)
+    const cx = X(0), sy = (barY) / 2 + 4;
+    g.fillStyle = PAL["--land"]; g.fillRect(cx, 22, R - cx, barY - 30); g.strokeStyle = PAL["--coast"]; g.strokeRect(cx, 22, R - cx, barY - 30);
+    g.fillStyle = PAL["--ink-2"]; g.fillText("Coast", cx + 6, 36);
+    g.fillStyle = PAL["--ocean"]; g.fillRect(L, 22, cx - L, barY - 30);
+    const sx = X(hrs), s = 15, rot = -hrs * .35, c3 = hrs < -2 ? 0 : 3;
+    g.save(); g.translate(sx, sy); g.rotate(rot);
+    g.fillStyle = catColor(c3); g.strokeStyle = PAL["--ink"]; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(s * .45, 0); g.quadraticCurveTo(s * .95, -s * .1, s * 1.1, -s * .85); g.moveTo(-s * .45, 0); g.quadraticCurveTo(-s * .95, s * .1, -s * 1.1, s * .85); g.stroke();
+    g.beginPath(); g.arc(0, 0, s * .45, 0, 7); g.fill(); g.stroke(); g.fillStyle = PAL["--ink"]; g.beginPath(); g.arc(0, 0, 2.5, 0, 7); g.fill(); g.restore();
+    g.strokeStyle = PAL["--ink"]; g.lineWidth = 1.5; g.beginPath(); g.moveTo(sx, sy + 20); g.lineTo(sx, barY - 2); g.stroke();
+  };
+  const set = v => {
+    hrs = v; $("#cdVal").textContent = v > 0 ? v + " hours" : v === 0 ? "Storm hits" : (-v) + " hours after";
+    const p = phases.find(p => v >= p.min && v <= p.max);
+    const b = $("#cdBadge"); b.className = "badge " + p.badge[0]; b.textContent = p.badge[1];
+    $("#cdHead").textContent = p.head; $("#cdList").innerHTML = p.list.map(x => `<li>${x}</li>`).join("");
+    draw();
+  };
+  $("#cd").addEventListener("input", e => set(+e.target.value));
+  onTheme(draw); window.addEventListener("resize", draw); set(72);
+})();
+
+
+/* ================= Section 4: eye passage ================= */
+(function eyePass(){
+  const c = $("#eyeCanvas"), gc = $("#eyeGauges");
+  const sim = new StormSim(c, { n: 1800, scale: .42, aspect: .625, intensity: .88, org: 1, seed: 21 });
+  sim.mode = "vis";
+  let p = 0, playing = false, paused = false, decided = null, phase = 0, peakFront = 0, lastR = 1;
+  const VMAX = 125;
+  const windAt = r => { const e = .062, m = .115; if (r < e) return 6 + 10 * Math.pow(r / e, 3); if (r < m) return lerp(16, VMAX, smooth(e, m, r)); return VMAX * Math.pow(m / r, .6); };
+  const read = () => {
+    const w = sim.w, hgt = sim.h; const R = Math.min(w, hgt) * sim.o.scale * (0.75 + .35);
+    const cx = lerp(w * 1.35, -w * .35, p), cy = hgt * .5, hx = w * .5, hy = hgt * .5;
+    const dx = (hx - cx) / R, dy = (hy - cy) / R, r = Math.hypot(dx, dy) + 1e-6;
+    let vx = dy / r, vy = -dx / r; vx -= .35 * dx / r; vy -= .35 * dy / r;
+    const brg = (Math.atan2(vx, -vy) * 180 / Math.PI + 360) % 360, from = (brg + 180) % 360;
+    return { cx, cy, r, v: windAt(r), from, mb: Math.round(1010 - 72 * Math.exp(-Math.pow(r / .3, 1.2))) };
+  };
+  const gauges = (rd) => {
+    const { ctx: g, w, h } = fitCanvas(gc, .55);
+    g.clearRect(0, 0, w, h);
+    const r0 = Math.min(w / 4.8, h / 2.9), cy = h * .55;
+    // speed dial
+    const cx1 = w * .26; g.lineWidth = 12; g.lineCap = "round";
+    g.strokeStyle = PAL["--rule-2"]; g.beginPath(); g.arc(cx1, cy, r0, Math.PI * .8, Math.PI * 2.2); g.stroke();
+    const f = clamp(rd.v / 160, 0, 1), col = catColor(catFromMph(rd.v));
+    g.strokeStyle = col; g.beginPath(); g.arc(cx1, cy, r0, Math.PI * .8, Math.PI * (.8 + 1.4 * f)); g.stroke();
+    g.fillStyle = PAL["--ink"]; g.textAlign = "center"; g.font = "800 28px Archivo,system-ui"; g.fillText(Math.round(rd.v), cx1, cy + 8);
+    g.font = "600 12px Archivo,system-ui"; g.fillStyle = PAL["--ink-3"]; g.fillText("mph", cx1, cy + 26); g.fillText("Wind speed", cx1, h - 6);
+    // compass
+    const cx2 = w * .74; g.lineWidth = 2; g.strokeStyle = PAL["--rule"]; g.beginPath(); g.arc(cx2, cy, r0, 0, 7); g.stroke();
+    g.fillStyle = PAL["--ink-2"]; g.font = "700 12px Archivo,system-ui";
+    [["N", 0], ["E", 90], ["S", 180], ["W", 270]].forEach(([l, a]) => { const ar = (a - 90) * Math.PI / 180; g.fillText(l, cx2 + Math.cos(ar) * (r0 - 12), cy + Math.sin(ar) * (r0 - 12) + 4); });
+    if (rd.v > 14) {
+      const a = (rd.from - 90) * Math.PI / 180; // arrow points from 'from' side toward center (wind blowing)
+      const x1 = cx2 + Math.cos(a) * (r0 - 22), y1 = cy + Math.sin(a) * (r0 - 22), x2 = cx2 - Math.cos(a) * (r0 - 22), y2 = cy - Math.sin(a) * (r0 - 22);
+      g.strokeStyle = col; g.lineWidth = 4; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
+      const ah = Math.atan2(y2 - y1, x2 - x1); g.fillStyle = col; g.beginPath(); g.moveTo(x2, y2); g.lineTo(x2 - 12 * Math.cos(ah - .45), y2 - 12 * Math.sin(ah - .45)); g.lineTo(x2 - 12 * Math.cos(ah + .45), y2 - 12 * Math.sin(ah + .45)); g.fill();
+    } else { g.fillStyle = PAL["--ink-3"]; g.font = "700 14px Archivo,system-ui"; g.fillText("Calm", cx2, cy + 5); }
+    g.fillStyle = PAL["--ink-3"]; g.font = "600 12px Archivo,system-ui"; g.fillText(rd.v > 14 ? "Wind blows from the " + compass(rd.from) : "Wind direction", cx2, h - 6);
+    g.textAlign = "left"; g.fillStyle = PAL["--ink-2"]; g.font = "650 13px Archivo,system-ui"; g.fillText("Pressure " + rd.mb + " mb", 6, 16);
+  };
+  const msg = (cls, html) => { const m = $("#eyeMsg"); m.className = "callout " + cls; m.innerHTML = html; };
+  function frame(dt, t){
+    if (playing && !paused) p += dt / 22 * (lastR < .3 ? .4 : 1);
+    if (p > 1) { p = 1; playing = false; }
+    const rd = read(); lastR = rd.r; sim.o.cx = rd.cx / sim.w; sim.o.cy = .5;
+    sim.step(REDUCED ? 0 : dt); sim.draw(t);
+    const g = sim.ctx; g.fillStyle = "#fff"; g.strokeStyle = "#111"; g.lineWidth = 2; g.beginPath(); g.arc(sim.w / 2, sim.h / 2, 6, 0, 7); g.fill(); g.stroke();
+    g.font = "650 12px Archivo,system-ui"; g.fillStyle = "rgba(3,16,26,.8)"; g.fillRect(sim.w / 2 + 10, sim.h / 2 - 26, 74, 20); g.fillStyle = "#fff"; g.fillText("Your house", sim.w / 2 + 16, sim.h / 2 - 12);
+    gauges(rd);
+    if (!playing) return;
+    if (phase === 0 && rd.v > 90) { phase = 1; msg("warn", "<p><strong>The eyewall is here.</strong> Wind over 100 mph! It is very loud. You are safe in your inside room.</p>"); }
+    if (phase === 1) peakFront = Math.max(peakFront, rd.v);
+    if (phase === 1 && rd.r < .055) { phase = 2; paused = true; $("#eyeChoice").hidden = false; msg("good", "<p><strong>Suddenly it is calm.</strong> The wind stops. You can see blue sky. A friend texts you: “The storm is over!” What do you do?</p>"); }
+    if (phase === 3 && rd.v > 90) { phase = 4;
+      msg(decided === "out" ? "warn" : "good", decided === "out"
+        ? "<p><strong>Danger!</strong> The other side of the storm hits while you are outside. The wind jumps to over 100 mph in minutes and blows from the <em>other</em> direction. Things fly through the air. People get badly hurt this way. The calm was the eye, not the end.</p>"
+        : "<p><strong>Good choice!</strong> The other side of the storm hits with wind just as strong, now from the other direction. You stayed safe inside.</p>"); }
+    if (p >= 1 && phase === 4) { phase = 5; $("#eyePlay").textContent = "Run it again"; }
+  }
+  addLoop(c, frame);
+  $("#eyeChoice").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; decided = b.dataset.c; $("#eyeChoice").hidden = true; paused = false; phase = 3;
+    msg(decided === "out" ? "watch" : "", decided === "out" ? "<p>You step outside to look around… Watch the wind arrow.</p>" : "<p>You stay in your safe room. Watch the wind arrow.</p>"); });
+  const reset = () => { p = 0; playing = false; paused = false; phase = 0; decided = null; $("#eyeChoice").hidden = true; $("#eyePlay").textContent = "Start the storm"; msg("", "<p>Your house is the white dot. Watch the wind speed and the arrow.</p>"); };
+  $("#eyePlay").addEventListener("click", () => { if (phase === 5 || p >= 1) reset(); playing = true; $("#eyePlay").textContent = "Storm in progress…"; msg("", "<p>First come the rain bands: gusts of wind and bursts of rain.</p>"); });
+  $("#eyeReset").addEventListener("click", reset);
+  window.addEventListener("resize", () => sim.resize());
+  onTheme(() => {});
+})();
+
+
+/* ================= Safety A: zones ================= */
+(function zones(){
+  const svg = $("#zoneScene");
+  const spots = [[120, 196], [360, 206], [520, 150], [640, 118], [820, 170]];
+  const adv = [
+    ["go", "Leave", "An island is the first place the ocean floods. Water can cover the whole island. Bridges close when the wind gets strong. Leave as soon as leaders say to, or even earlier."],
+    ["go", "Leave", "Low land near the water floods fast. The ocean can push water a long way inland. When leaders say your area must leave, go. You do not need to go far. A family member’s home or a shelter outside the flood zone is enough."],
+    ["go", "Leave for a strong building", "The ocean can’t reach you here, but the wind can. Mobile homes are not safe in hurricane winds, even far from the beach. Go to a strong building or a shelter."],
+    ["stay", "Stay home and hide from wind", "Your home is strong, high up, and far from the ocean. Staying home is often safest here. Go to a room in the middle of the house with no windows. Have supplies for 3 days."],
+    ["go", "Watch the river and be ready to move", "Hurricanes can drop huge amounts of rain far from the beach. Rivers can rise for days after the storm. Have a plan to get to higher ground. Never drive into a flooded road."]
+  ];
+  svg.innerHTML = `<defs><linearGradient id="zSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5d7a90"/><stop offset="1" stop-color="#a9c0cf"/></linearGradient></defs>
+  <style>#zoneScene .surge{transition:opacity .5s}#zoneScene .spot{cursor:pointer}#zoneScene .spot circle{transition:r .3s}
+  #zoneScene .sel circle{fill:#ffd166;stroke:#111}</style>
+  <rect width="900" height="300" fill="url(#zSky)"/>
+  <path d="M0 230 H900 V300 H0Z" fill="#1f5f86"/>
+  <path d="M60 230 Q90 205 120 206 Q150 205 175 230 Z" fill="#d8c79c"/>
+  <path d="M270 230 Q300 214 360 214 Q420 214 450 190 Q520 160 600 140 Q640 126 700 126 Q760 130 780 175 L800 190 Q820 196 840 190 Q860 176 900 160 V300 H270Z" fill="#6f8f5f"/>
+  <path d="M790 186 Q820 200 850 186" stroke="#1f5f86" stroke-width="8" fill="none"/>
+  <path class="surge" id="zSurge" d="M0 222 H470 V300 H0Z" fill="#2f8fc0" opacity=".55"/>
+  <path class="surge" id="zRiver" d="M780 176 Q820 206 860 176 L860 200 L780 200Z" fill="#2f8fc0" opacity="0"/>
+  <text x="14" y="216" font-size="12" font-weight="700" fill="#fff" font-family="Archivo,system-ui">Flood water from the ocean (example)</text>
+  <text x="200" y="250" font-size="12" font-weight="700" fill="#e4f2fa" font-family="Archivo,system-ui">Bay</text>
+  <text x="20" y="280" font-size="12" font-weight="700" fill="#e4f2fa" font-family="Archivo,system-ui">Ocean</text>
+  <text x="808" y="226" font-size="12" font-weight="700" fill="#fff" font-family="Archivo,system-ui">River</text>
+  <path d="M520 150 l-14 0 l0 -14 l14 0 z" fill="#ddd"/><rect x="503" y="140" width="34" height="12" fill="#e7e2d4" stroke="#555"/>
+  <path d="M624 118 l16 -16 l16 16 z" fill="#8a3b2e"/><rect x="627" y="118" width="26" height="16" fill="#efe6cf"/>
+  ${spots.map(([x, y], i) => `<g class="spot" data-z="${i}"><circle cx="${x}" cy="${y}" r="14" fill="#fff" stroke="#22313b" stroke-width="2"/><text x="${x}" y="${y + 5}" text-anchor="middle" font-size="14" font-weight="800" font-family="Archivo,system-ui" fill="#22313b">${i + 1}</text></g>`).join("")}`;
+  const sel = i => {
+    $$("#zones button").forEach(b => b.setAttribute("aria-pressed", +b.dataset.z === i));
+    $$("#zoneScene .spot").forEach(g => g.classList.toggle("sel", +g.dataset.z === i));
+    $("#zRiver").style.opacity = i === 4 ? .9 : 0;
+    const [k, h, p] = adv[i];
+    $("#zoneOut").innerHTML = `<div class="verdict ${k}"><h4>${k === "stay" ? "🏠 " : "🚗 "}${h}</h4><p>${p}</p></div>`;
+  };
+  $("#zones").addEventListener("click", e => { const b = e.target.closest("button"); if (b) sel(+b.dataset.z); });
+  svg.addEventListener("click", e => { const g = e.target.closest(".spot"); if (g) sel(+g.dataset.z); });
+})();
+
+
+/* ================= Safety B: kit ================= */
+(function kit(){
+  // type 1 = essential, 0 = dangerous, 2 = tempting but not important
+  const CAP = 16;
+  const items = [
+    ["💧", "Water", 1, ""], ["🥫", "Canned and dry food", 1, ""], ["🔧", "Can opener (not electric)", 1, ""], ["🔦", "Flashlights", 1, ""], ["🔋", "Extra batteries", 1, ""],
+    ["📻", "Weather radio", 1, ""], ["🩹", "First aid kit", 1, ""], ["💊", "Medicine you take", 1, ""], ["🔌", "Phone power bank", 1, ""],
+    ["📄", "Important papers in a waterproof bag", 1, ""], ["💵", "Cash", 1, ""], ["🐶", "Pet food", 1, ""], ["📣", "Whistle to call for help", 1, ""], ["🧻", "Wipes and soap", 1, ""],
+    ["🎮", "Video game system", 2, "No power means no games. It takes up space you need."],
+    ["💻", "Laptop", 2, "No power or internet means it won’t work for long. Your phone and power bank are enough."],
+    ["🔊", "Bluetooth speaker", 2, "It uses batteries you need for your flashlight and radio."],
+    ["🎧", "Headphones", 2, "Nice to have, but they don’t keep you safe."],
+    ["💄", "Makeup bag", 2, "It won’t keep you safe, fed, or dry. Wipes and soap are what you need."],
+    ["👟", "Favorite sneakers", 2, "Your kit is for staying alive, not for saving your stuff. Wear strong shoes instead."],
+    ["🛹", "Skateboard", 2, "Roads will be full of branches, nails, and water. It won’t help."],
+    ["🍬", "Big bag of candy", 2, "A small treat is okay, but candy is not real food. Pack canned and dry food."],
+    ["🕯️", "Candles", 0, "Candles can start fires. Fire trucks may not be able to get to you. Use flashlights."],
+    ["🔥", "Grill to cook inside", 0, "Grills make a poison gas called carbon monoxide. You can’t see or smell it. Grills must stay outside."],
+    ["⛽", "Generator for the garage", 0, "Generators make poison gas. Never use one in a garage, even with the door open. Keep it outside, far from windows."]
+  ];
+  // shuffle display order once (stable per load) so essentials aren’t grouped
+  const order = items.map((_, i) => i); const rr = rng(13); for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rr() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  const on = new Set(WORK.kit.map(n => items.findIndex(it => it[1] === n)).filter(i => i >= 0));
+  $("#kit").innerHTML = order.map(i => { const it = items[i]; return `<button type="button" data-i="${i}" class="${it[2] === 0 ? "bad" : it[2] === 2 ? "meh" : ""}" aria-pressed="${on.has(i)}"><span class="e">${it[0]}</span>${it[1]}</button>`; }).join("");
+  const total = items.filter(it => it[2] === 1).length;
+  const stats = () => ({ good: [...on].filter(i => items[i][2] === 1).length, bad: [...on].filter(i => items[i][2] === 0), meh: [...on].filter(i => items[i][2] === 2) });
+  const upd = (last, full) => {
+    const { good, bad, meh } = stats();
+    $("#kitMeter").style.width = Math.max(0, good / total * 100 - bad.length * 15) + "%";
+    $("#kitSlots").textContent = on.size + " / " + CAP; $("#kitSlots").style.color = on.size >= CAP ? "var(--warn)" : "";
+    WORK.kit = [...on].map(i => items[i][1]); WORK.kitScore = { good, total, bad: bad.length, meh: meh.length }; saveWork();
+    const m = $("#kitMsg");
+    if (full) { m.className = "callout watch"; m.innerHTML = "<p><strong>Your backpack is full.</strong> Take something out first. What do you need most?</p>"; return; }
+    if (last !== undefined && on.has(last) && items[last][2] === 0) { m.className = "callout warn"; m.innerHTML = `<p><strong>Danger!</strong> ${items[last][3]}</p>`; return; }
+    if (last !== undefined && on.has(last) && items[last][2] === 2) { m.className = "callout watch"; m.innerHTML = `<p><strong>Do you really need it?</strong> ${items[last][3]}</p>`; return; }
+    if (bad.length) { m.className = "callout watch"; m.innerHTML = `<p>Your kit has ${good} of ${total} essentials, but something in it is dangerous. Look again.</p>`; return; }
+    m.className = good === total ? "callout good" : "callout";
+    m.innerHTML = good === total ? `<p><strong>Kit complete.</strong> ${meh.length ? `You still have ${meh.length} nice-to-have item${meh.length > 1 ? "s" : ""} in there. That is okay if there is room. Safety things come first.` : "Keep it where you can grab it fast. Check the food and batteries every summer."}</p>` : `<p>${good} of ${total} essentials packed${meh.length ? `, plus ${meh.length} nice-to-have item${meh.length > 1 ? "s" : ""} taking up space` : ""}.</p>`;
+  };
+  $("#kit").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const i = +b.dataset.i;
+    if (!on.has(i) && on.size >= CAP) { upd(undefined, true); return; }
+    on.has(i) ? on.delete(i) : on.add(i); b.setAttribute("aria-pressed", on.has(i)); upd(i); });
+  $("#fam").addEventListener("input", e => { const n = +e.target.value; $("#famVal").textContent = n; $("#waterGal").textContent = n * 3 + " gal"; });
+  upd();
+})();
+
+
+/* ================= Safety C: story ================= */
+(function story(){
+  const el = $("#story");
+  const N = [
+    { when: "Thursday morning · 2 days before", t: "A hurricane watch starts for your town.", d: "The storm is a Category 2. Your street floods easily.",
+      c: [["Wait and see if it gets worse.", 0, "A watch is the time to get ready. Stores run out of water and gas fast."],
+          ["Start getting ready: pack the kit, charge phones, make a plan.", 1, "Yes! A watch gives you time to get ready while it is still calm."],
+          ["Do nothing. It is only a Category 2.", 0, "The category is only about wind. Water from the ocean can still flood your street."]] },
+    { when: "Thursday night · 1 and a half days before", t: "A hurricane warning starts. Leaders say your area must leave.", d: "Your family has to decide tonight.",
+      c: [["Leave now. Go to your cousin’s house 40 miles away, where it won’t flood.", 1, "Yes! You only need to get away from the flood zone."],
+          ["Stay home. Our house was fine last time.", 0, "Every storm is different. This one could bring much more water than last time."]] },
+    { when: "Friday afternoon · on the road", t: "Water is covering the road ahead.", d: "It looks only a few inches deep.",
+      c: [["Turn around and find another road.", 1, "Yes! Turn around, don’t drown. You can’t tell how deep or fast the water is."],
+          ["Drive through slowly. It looks shallow.", 0, "Just 1 foot of moving water can float a car away."]] },
+    { when: "Saturday night · during the storm", t: "The power goes out. Your uncle wants to run the generator in the garage.", d: "It is hot, and the food in the fridge may spoil.",
+      c: [["Put it outside, far from windows and doors.", 1, "Yes! Generators make a poison gas. It must stay outside."],
+          ["The garage is fine if the door is open.", 0, "The poison gas can still build up and get into the house. Generators go outside only."]] },
+    { when: "Sunday morning · after the storm", t: "The sky is clear. Everyone wants to go home now.", d: "A friend says some roads are open.",
+      c: [["Wait until leaders say it is safe to go home.", 1, "Yes! Roads may have fallen power lines, flooding, or broken bridges."],
+          ["Go now. The roads look fine here.", 0, "Roads near the water can be very different. Wait for the all-clear."]] }
+  ];
+  let i = 0, score = 0; const picks = [];
+  const render = () => {
+    if (i >= N.length) { WORK.story = { score, of: N.length, picks: picks.slice() }; saveWork();
+      el.innerHTML = `<p class="scene">Your results</p><h4>You made ${score % 1 ? score.toFixed(1) : score} of ${N.length} safe choices.</h4><p>${score >= 4.5 ? "Great job! You made safe choices that protect lives." : "Look at the choices that were not safe. Real people have made these mistakes. Try again to practice."}</p><div class="btnrow"><button class="btn ghost" type="button" id="stRe">Try again</button></div>`;
+      $("#stRe").onclick = () => { i = 0; score = 0; picks.length = 0; render(); }; return;
+    }
+    const n = N[i];
+    el.innerHTML = `<p class="scene">Step ${i + 1} of ${N.length} · ${n.when}</p><h4>${n.t}</h4><p>${n.d}</p><div class="choices">${n.c.map((c, k) => `<button type="button" data-k="${k}">${c[0]}</button>`).join("")}</div><div id="stFb" aria-live="polite"></div>`;
+    $(".choices", el).addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b || el.dataset.lock === "1") return; el.dataset.lock = "1";
+      const ch = n.c[+b.dataset.k]; score += ch[1]; picks[i] = (ch[1] === 1 ? "Safe: " : ch[1] > 0 ? "Okay: " : "Not safe: ") + ch[0];
+      $$(".choices button", el).forEach((x, k) => { if (n.c[k][1] === 1) x.classList.add("right"); else if (x === b) x.classList.add("wrong"); x.disabled = true; });
+      $("#stFb").innerHTML = `<div class="feedback ${ch[1] === 1 ? "ok" : ch[1] > 0 ? "meh" : "no"}">${ch[2]}</div><button class="btn" type="button" id="stNext">${i === N.length - 1 ? "See results" : "Next"}</button>`;
+      $("#stNext").onclick = () => { el.dataset.lock = "0"; i++; render(); };
+    });
+  };
+  render();
+})();
+
+
+/* ================= Safety D: flip cards + flood ================= */
+(function after(){
+  const cards = [
+    ["🌊", "Floodwater", "It looks calm…", "Floodwater can hide holes, sharp things, and germs. It can even carry electricity. Stay out of it."],
+    ["⛽", "Generators", "The power is out…", "Generators make a poison gas you can’t see or smell. Keep them outside, far from windows and doors."],
+    ["⚡", "Fallen power lines", "That wire looks dead…", "Treat every fallen wire like it can hurt you. Stay far away. Tell an adult to call the power company."],
+    ["🥵", "Heat with no power", "No air conditioning…", "It can get very hot with no power. Drink water, rest in the shade, and check on older neighbors."],
+    ["🪚", "Cleaning up", "Let’s clean it fast…", "Nails, broken glass, and tools can hurt you. Wear shoes and gloves. Let adults do the big jobs."],
+    ["🚰", "Drinking water", "The sink still works…", "Tap water might not be safe after a flood. Drink bottled water until leaders say tap water is okay."]
+  ];
+  $("#flips").innerHTML = cards.map(c => `<button class="flip" type="button" aria-pressed="false"><div class="fi"><div class="fa"><span class="e">${c[0]}</span><div><b>${c[1]}</b><br><span>${c[2]} Tap to see.</span></div></div><div class="fb">${c[3]}</div></div></button>`).join("");
+  $("#flips").addEventListener("click", e => { const b = e.target.closest(".flip"); if (b) b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true"); });
+
+  const svg = $("#floodScene"), G = 270, PX = 3;
+  svg.innerHTML = `<rect width="900" height="300" fill="#8fa9b8"/><rect y="${G}" width="900" height="30" fill="#4a4a4a"/>
+    <rect x="40" y="120" width="160" height="150" fill="#b9a68a"/><rect x="700" y="100" width="170" height="170" fill="#a7b5a0"/>
+    <g id="fPerson" transform="translate(330 ${G})"><g><circle cx="0" cy="${-72 * PX + 12}" r="12" fill="#22313b"/><path d="M0 ${-72 * PX + 26} V${-34 * PX} M0 ${-34 * PX} L-14 0 M0 ${-34 * PX} L14 0 M0 ${-60 * PX} L-20 ${-44 * PX} M0 ${-60 * PX} L20 ${-44 * PX}" stroke="#22313b" stroke-width="9" stroke-linecap="round"/></g></g>
+    <g id="fCar" transform="translate(470 ${G})"><g><path d="M0 -20 h220 v-50 q-10 -6 -40 -8 l-30 -40 h-90 l-34 40 q-26 2 -26 8z" fill="#c0392b"/><path d="M66 -114 h52 v32 h-78z M126 -114 h36 l26 32 h-62z" fill="#cfe6f2"/><circle cx="48" cy="-18" r="20" fill="#222"/><circle cx="176" cy="-18" r="20" fill="#222"/></g></g>
+    <path id="fWater" fill="#4b7f96" opacity=".85" d=""/>
+    <g transform="translate(250 ${G})">${[0, 6, 12, 24, 36].map(v => `<line x1="0" x2="12" y1="${-v * PX}" y2="${-v * PX}" stroke="#fff" stroke-width="2"/><text x="-4" y="${-v * PX + 4}" text-anchor="end" font-size="12" font-weight="700" fill="#fff" font-family="Archivo,system-ui">${v}″</text>`).join("")}</g>`;
+  let depth = 0, cur = 0;
+  addLoop(svg, (dt, t) => {
+    cur += (depth - cur) * Math.min(1, dt * 4);
+    const y = G - cur * PX; let d = `M0 ${y}`; for (let x = 0; x <= 900; x += 25) d += ` L${x} ${y + Math.sin(x / 30 - t * 4) * Math.min(4, cur / 3)}`;
+    $("#fWater").setAttribute("d", d + " L900 300 L0 300Z");
+    const pTilt = cur >= 6 ? clamp((cur - 6) * 4, 0, 70) : 0;
+    $("#fPerson > g").setAttribute("transform", `rotate(${pTilt + (cur >= 6 ? Math.sin(t * 3) * 3 : 0)})`);
+    const lift = cur >= 12 ? (cur - 10) * PX * .9 : 0, drift = cur >= 24 ? ((t * 40) % 300) : 0;
+    $("#fCar > g").setAttribute("transform", `translate(${drift} ${-lift}) rotate(${cur >= 12 ? Math.sin(t * 2) * 4 + (cur >= 24 ? 8 : 0) : 0} 110 -60)`);
+  });
+  $("#flood").addEventListener("input", e => {
+    depth = +e.target.value; $("#floodVal").textContent = depth + " in";
+    const m = $("#floodMsg");
+    m.innerHTML = depth >= 24 ? "<p><strong>2 feet:</strong> moving water this deep can carry away big trucks.</p>"
+      : depth >= 12 ? "<p><strong>1 foot:</strong> moving water this deep can float a car away.</p>"
+      : depth >= 6 ? "<p><strong>6 inches:</strong> fast water this deep can knock a grown-up down.</p>"
+      : "<p><strong>Turn around, don’t drown.</strong> Never walk or drive into floodwater.</p>";
+  });
+})();
+
+/* ================= extra work fields ================= */
+WORK.mc = WORK.mc || {}; WORK.grow = WORK.grow || []; WORK.sort = WORK.sort || null; WORK.room = WORK.room || null;
+WORK.feel = WORK.feel || null; WORK.plan = WORK.plan || [];
+
+/* ================= vocab cards ================= */
+(function vocab(){
+  const W = [
+    ["🌀", "Hurricane", "A huge storm that spins, with wind of 74 miles per hour or more. It starts over warm ocean water."],
+    ["👁️", "Eye", "The calm center of a hurricane. The storm is not over when the eye passes."],
+    ["🌊", "Storm surge", "Ocean water pushed onto land by the storm. It is the most dangerous part of most hurricanes."],
+    ["⚠️", "Watch", "The storm might come. Get ready."],
+    ["🚨", "Warning", "The storm is coming. Act now."],
+    ["🚗", "Evacuate", "To leave your home and go somewhere safer."],
+    ["🏠", "Shelter", "A safe place to stay. It can be a strong building or a safe room in your home."],
+    ["💧", "Flood", "When water covers land that is usually dry."],
+    ["🔁", "Recover", "To get back to normal after something bad happens. It takes time."]
+  ];
+  $("#vocab").innerHTML = W.map(w => `<button class="flip" type="button" aria-pressed="false"><div class="fi"><div class="fa"><span class="e">${w[0]}</span><div><b>${w[1]}</b><br><span>Tap to see what it means.</span></div></div><div class="fb"><b>${w[1]}</b><br>${w[2]}</div></div></button>`).join("");
+  $("#vocab").addEventListener("click", e => { const b = e.target.closest(".flip"); if (b) b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true"); });
+})();
+
+/* ================= grow a storm ================= */
+(function grow(){
+  const c = $("#growCanvas"), sim = new StormSim(c, { n: 1800, scale: .5, aspect: .75, intensity: .02, org: 0, seed: 5 });
+  let water = 2, run = false, t0 = 0, w = 20, peak = 20;
+  const target = [28, 80, 135];
+  const names = w => w < 25 ? "Storms" : w < 34 ? "Spinning" : w < 64 ? "Tropical storm" : "Hurricane";
+  const stage = w => w < 25 ? 0 : w < 34 ? 1 : w < 64 ? 2 : 3;
+  const ui = () => {
+    $("#growWind").textContent = mphFromKt(w) + " mph";
+    $("#growName").textContent = names(w) + (w >= 64 ? " (Cat " + catFromKt(w) + ")" : "");
+    $$("#growSteps .st").forEach(d => { const i = +d.dataset.s; d.classList.toggle("on", i <= stage(w)); d.classList.toggle("now", i === stage(w)); });
+    sim.org = smooth(18, 62, w); sim.intensity = clamp((w - 18) / 125, 0, 1);
+  };
+  const msg = (cls, h) => { const m = $("#growMsg"); m.className = "callout " + cls; m.innerHTML = "<p>" + h + "</p>"; };
+  const end = () => {
+    run = false; $("#growGo").textContent = "Start again";
+    const r = [
+      ["watch", "<strong>No hurricane.</strong> The water was too cool. The storm had no fuel, so it stayed small and messy."],
+      ["", "<strong>It grew!</strong> Warm water gave it fuel. It became a " + names(peak).toLowerCase() + " with wind of " + mphFromKt(peak) + " mph."],
+      ["good", "<strong>A big hurricane!</strong> Very warm water gave it lots of fuel. Wind reached " + mphFromKt(peak) + " mph. See the eye in the middle?"]
+    ][water];
+    msg(r[0], r[1]);
+    WORK.grow.push({ water: ["Cool", "Warm", "Very warm"][water], mph: mphFromKt(peak), result: names(peak) + (peak >= 64 ? " (Cat " + catFromKt(peak) + ")" : "") });
+    if (WORK.grow.length > 10) WORK.grow.shift(); saveWork();
+  };
+  addLoop(c, (dt, t) => {
+    if (run) { w += (target[water] - w) * Math.min(1, dt * .55) + (water ? 0 : (Math.sin(t * 2) * .1)); peak = Math.max(peak, w); if (t - t0 > 7) end(); ui(); }
+    sim.step(REDUCED ? 0 : dt); sim.draw(t);
+  });
+  $("#growGo").addEventListener("click", () => { w = 20; peak = 20; run = true; t0 = performance.now() / 1000; $("#growGo").textContent = "Growing…"; msg("", "Watch the storm and the wind speed…"); ui(); });
+  $$("#waterSeg button").forEach(b => b.addEventListener("click", () => { $$("#waterSeg button").forEach(x => x.setAttribute("aria-pressed", x === b)); water = +b.dataset.v; }));
+  $$("#growView button").forEach(b => b.addEventListener("click", () => { $$("#growView button").forEach(x => x.setAttribute("aria-pressed", x === b)); sim.mode = b.dataset.v; }));
+  window.addEventListener("resize", () => sim.resize());
+  ui();
+})();
+
+/* ================= senses timeline ================= */
+(function senses(){
+  const S = [
+    ["1 to 2 days before", "#6FA8DC", [["👀", "Thin, high clouds. Bigger waves at the beach."], ["📱", "Alerts on phones, TV, and radio."], ["🛒", "Crowded stores. Long lines for gas."]]],
+    ["During the storm", "#D83A3A", [["👀", "Dark sky. Rain blowing sideways. Trees bending."], ["👂", "Loud, roaring wind. Things hitting the house."], ["🖐️", "The house may shake. The power goes out. It gets hot and dark."]]],
+    ["In the eye", "#F2D04B", [["👀", "The wind stops. You may see blue sky."], ["⚠️", "This is NOT the end. The other side of the storm is coming soon."]]],
+    ["After the storm", "#1F7A4D", [["👀", "Flooded streets. Fallen trees and power lines. Broken roofs."], ["🔌", "No power for days. Phones may not work well."], ["💛", "People feel tired, scared, or sad. That is normal."]]]
+  ];
+  $("#senses").innerHTML = S.map(([t, c, items]) => `<div class="sense" style="--sc:${c}"><h4>${t}</h4><ul>${items.map(([i, x]) => `<li><span aria-hidden="true">${i}</span>${x}</li>`).join("")}</ul></div>`).join("");
+})();
+
+/* ================= watch / warning sort ================= */
+(function sortWW(){
+  const Q = [["The storm might come in about 2 days.", "watch"], ["If leaders say leave, leave right now.", "warning"], ["Time to pack your go-kit and charge phones.", "watch"], ["The storm will arrive in about 1 and a half days.", "warning"], ["Make a plan for where you would go.", "watch"], ["Go to your safe place or leave the flood zone.", "warning"]];
+  const el = $("#sortWW"); let i = 0, right = 0, firstTry = true;
+  const render = () => {
+    if (i >= Q.length) { WORK.sort = { right, of: Q.length }; saveWork();
+      el.innerHTML = `<div class="feedback ok"><strong>Done!</strong> You got ${right} of ${Q.length} right on the first try.</div><button class="btn ghost sm" type="button" id="wwAgain">Play again</button>`;
+      $("#wwAgain").onclick = () => { i = 0; right = 0; firstTry = true; render(); }; return; }
+    el.innerHTML = `<p class="note">Card ${i + 1} of ${Q.length}</p><div class="sortcard">${Q[i][0]}</div><div class="btnrow"><button class="btn big watchbtn" type="button" data-a="watch">⚠️ Watch</button><button class="btn big warnbtn" type="button" data-a="warning">🚨 Warning</button></div><div id="wwFb" aria-live="polite"></div>`;
+    $$("button[data-a]", el).forEach(b => b.onclick = () => {
+      const ok = b.dataset.a === Q[i][1];
+      if (ok) { if (firstTry) right++; $("#wwFb").innerHTML = `<div class="feedback ok">Yes! That is a <strong>${Q[i][1]}</strong>.</div>`; setTimeout(() => { i++; firstTry = true; render(); }, 1100); $$("button[data-a]", el).forEach(x => x.disabled = true); }
+      else { firstTry = false; $("#wwFb").innerHTML = `<div class="feedback no">Not quite. Watch = the storm <em>might</em> come. Warning = it <em>is</em> coming. Try again.</div>`; }
+    });
+  };
+  render();
+})();
+
+/* ================= safe room ================= */
+(function room(){
+  const svg = $("#houseMap");
+  const R = [
+    ["living", 40, 40, 330, 130, "Living room", false, "This room has big windows. Wind can break windows and send glass flying."],
+    ["kitchen", 370, 40, 230, 130, "Kitchen", false, "There is a window here. Stay away from windows during the storm."],
+    ["bed", 600, 40, 260, 130, "Bedroom", false, "This room has windows on two walls. Not the safest place."],
+    ["dining", 40, 170, 330, 100, "Dining room", false, "This room is on an outside wall with a window. Pick a room in the middle."],
+    ["bath", 370, 170, 130, 100, "Bathroom (middle, no windows)", true, "Yes! A small room in the middle of the house, with no windows, is the safest place to hide from wind."],
+    ["closet", 500, 170, 100, 100, "Closet", true, "Yes! A closet in the middle of the house, with no windows, is a safe place too."],
+    ["bed2", 600, 170, 260, 100, "Bedroom 2", false, "There is a window here. Pick a room with no windows."],
+    ["garage", 40, 270, 330, 110, "Garage", false, "Garage doors can blow in during strong wind. Not safe."],
+    ["laundry", 370, 270, 230, 110, "Laundry room", false, "This room has an outside window. Pick a room in the middle of the house."],
+    ["bed3", 600, 270, 260, 110, "Bedroom 3", false, "This room has windows. Pick a room with no windows."]
+  ];
+  const win = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#9fd3ef" stroke="#22313b" stroke-width="2"/>`;
+  svg.innerHTML = `<style>#houseMap .rm{cursor:pointer}#houseMap .rm rect.f{fill:var(--panel);stroke:#22313b;stroke-width:3;transition:fill .2s}#houseMap .rm:hover rect.f{fill:var(--accent-soft)}#houseMap .rm.ok rect.f{fill:var(--good-soft)}#houseMap .rm.no rect.f{fill:var(--warn-soft)}#houseMap text{font:650 21px Archivo,system-ui,sans-serif;fill:var(--ink);pointer-events:none}</style>
+    ${R.map(r => `<g class="rm" data-k="${r[0]}" role="button" tabindex="0" aria-label="${r[5]}"><rect class="f" x="${r[1]}" y="${r[2]}" width="${r[3]}" height="${r[4]}"/><text x="${r[1] + r[3] / 2}" y="${r[2] + r[4] / 2 + 5}" text-anchor="middle">${r[5].replace(" (middle, no windows)", "")}</text></g>`).join("")}
+    ${win(90, 33, 120, 14)}${win(230, 33, 90, 14)}${win(440, 33, 80, 14)}${win(680, 33, 100, 14)}${win(853, 70, 14, 70)}${win(853, 190, 14, 60)}${win(33, 70, 14, 70)}${win(33, 190, 14, 60)}${win(440, 373, 80, 14)}${win(690, 373, 90, 14)}${win(853, 300, 14, 60)}
+    <rect x="110" y="373" width="190" height="14" fill="#8a8f94" stroke="#22313b" stroke-width="2"/><text x="205" y="410" text-anchor="middle" style="font-size:13px">garage door</text>
+    <text x="450" y="22" text-anchor="middle" style="font-size:13px;fill:var(--ink-3)">Blue = windows</text>`;
+  const pick = k => {
+    const r = R.find(x => x[0] === k); if (!r) return;
+    $$("#houseMap .rm").forEach(g => g.classList.remove("ok", "no"));
+    $(`#houseMap .rm[data-k="${k}"]`).classList.add(r[6] ? "ok" : "no");
+    if (!WORK.room) { WORK.room = { first: r[5].replace(" (middle, no windows)", ""), ok: r[6] }; saveWork(); }
+    if (r[6] && !WORK.room.found) { WORK.room.found = true; saveWork(); }
+    $("#houseOut").innerHTML = `<div class="feedback ${r[6] ? "ok" : "no"}"><strong>${r[5].replace(" (middle, no windows)", "")}:</strong> ${r[7]}</div>`;
+  };
+  svg.addEventListener("click", e => { const g = e.target.closest(".rm"); if (g) pick(g.dataset.k); });
+  const list = document.createElement("div"); list.className = "zones roomlist";
+  list.innerHTML = R.map(r => `<button type="button" data-k="${r[0]}">${r[5].replace(" (middle, no windows)", "")}</button>`).join("");
+  svg.after(list); list.addEventListener("click", e => { const b = e.target.closest("button"); if (b) pick(b.dataset.k); });
+  svg.addEventListener("keydown", e => { const g = e.target.closest(".rm"); if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pick(g.dataset.k); } });
+})();
+
+/* ================= recovery, helpers, feelings, plan ================= */
+(function recover(){
+  const T = [
+    ["1", "The first day", "Stay inside until leaders say it is safe. Check that your family is okay. Text family and friends to say you are safe. Stay away from floodwater and fallen wires."],
+    ["2", "The first week", "Power crews start fixing lines. Shelters and helpers hand out food, water, and ice. Adults start cleaning up. Stores and gas stations slowly open."],
+    ["3", "The next few weeks", "Power and water come back for most people. Schools reopen. Families fix roofs and dry out homes. Help from insurance and the government can help pay for repairs."],
+    ["4", "Months later", "Some homes, roads, and buildings take a long time to rebuild. Communities work together. Feelings get better with time and support."]
+  ];
+  $("#recovery").innerHTML = T.map(r => `<details class="rstep"><summary><span class="n">${r[0]}</span>${r[1]}</summary><p>${r[2]}</p></details>`).join("");
+  const Hh = [["🚒", "Rescue workers", "Firefighters, police, and the Coast Guard rescue people who are trapped."], ["⚡", "Power crews", "Line workers come from all over the country to fix power lines."], ["❤️", "Red Cross and shelters", "They give people a safe place to sleep, food, water, and first aid."], ["🏛️", "FEMA", "The government group that helps people pay to fix and rebuild homes."], ["🏫", "School counselors", "You can talk to them about your feelings, any time."], ["🏘️", "Neighbors and volunteers", "People help each other clean up, share food, and check on older neighbors."]];
+  $("#helpers").innerHTML = Hh.map(h => `<div class="helper"><span class="e" aria-hidden="true">${h[0]}</span><b>${h[1]}</b><p>${h[2]}</p></div>`).join("");
+
+  const F = [["Talk to a trusted adult", 1], ["Keep your feelings a secret forever", 0], ["Draw or write about how you feel", 1], ["Watch scary storm news all day and night", 0], ["Keep normal routines, like meals and bedtime", 1], ["Stay alone in your room all the time", 0], ["Take breaks from the news", 1], ["Help with safe chores", 1], ["Pretend nothing happened", 0], ["Spend time with friends and family", 1]];
+  const fg = $("#feelGame"), on = new Set();
+  fg.innerHTML = F.map((f, i) => `<button type="button" data-i="${i}" aria-pressed="false">${f[0]}</button>`).join("");
+  const upd = last => {
+    const good = [...on].filter(i => F[i][1]).length, bad = [...on].filter(i => !F[i][1]).length, total = F.filter(f => f[1]).length;
+    WORK.feel = { good, bad, total, picks: [...on].map(i => F[i][0]) }; saveWork();
+    let h = "";
+    if (last !== undefined && on.has(last)) h = F[last][1] ? `<div class="feedback ok">Yes, that helps!</div>` : `<div class="feedback no">That one doesn’t really help. Feelings are easier when you share them and take care of yourself.</div>`;
+    h += `<p class="note">${good} of ${total} helpful things found.${good === total && !bad ? " Great job!" : ""}</p>`;
+    $("#feelOut").innerHTML = h;
+  };
+  fg.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const i = +b.dataset.i; on.has(i) ? on.delete(i) : on.add(i); b.setAttribute("aria-pressed", on.has(i)); b.classList.toggle("bad", !F[i][1]); upd(i); });
+
+  const P = ["Check that my family is safe", "Stay away from floodwater and fallen wires", "Drink bottled water until tap water is safe", "Help clean up safely, with gloves and shoes", "Help an adult check on neighbors", "Talk to a counselor or trusted adult about my feelings", "Keep my normal routine", "Go to a shelter if we need food or a place to stay"];
+  const pp = $("#planPick");
+  pp.innerHTML = P.map((p, i) => `<button type="button" data-i="${i}" aria-pressed="${WORK.plan.includes(p)}">${p}</button>`).join("");
+  const note = () => { $("#planNote").textContent = WORK.plan.length === 3 ? "Your plan is set! ✓" : `Pick ${3 - WORK.plan.length} more.`; };
+  pp.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const p = P[+b.dataset.i];
+    if (WORK.plan.includes(p)) WORK.plan = WORK.plan.filter(x => x !== p); else if (WORK.plan.length < 3) WORK.plan.push(p); else { $("#planNote").textContent = "You already picked 3. Tap one to take it out first."; return; }
+    $$("button", pp).forEach(x => x.setAttribute("aria-pressed", WORK.plan.includes(P[+x.dataset.i]))); saveWork(); note(); });
+  note();
+})();
+
+/* ================= quick check questions ================= */
+const MCQ = {
+  s1: [["What does a hurricane need to grow?", ["Warm ocean water", "Snow", "Dry land", "Cold air"], 0, "Warm ocean water is the fuel."],
+       ["What makes a hurricane weaker?", ["Moving over land", "Warm water", "More rain clouds", "Sunny days"], 0, "Over land, the storm loses its warm-water fuel."]],
+  s2: [["What is the most dangerous part of most hurricanes?", ["Water from the ocean (storm surge)", "Thunder", "Clouds", "Lightning"], 0, "Storm surge, the water pushed on land, is the biggest danger."],
+       ["The eye passes over and it gets calm. What should you do?", ["Stay inside", "Go outside to look", "Go for a walk", "Drive to the store"], 0, "The other side of the storm is coming. Stay inside."]],
+  s3: [["A hurricane WATCH means…", ["The storm might come. Get ready.", "The storm is here right now.", "The storm is over.", "Nothing will happen."], 0, "Watch = wait and get ready."],
+       ["There is a hurricane WARNING, and leaders say to leave. You should…", ["Leave right away", "Wait one more day", "Go to the beach to watch", "Turn off the news"], 0, "Warning = work fast and go."]],
+  s4: [["What does “run from water, hide from wind” mean?", ["Leave if water can flood your home. If not, stay inside away from windows.", "Always stay home.", "Go to the beach.", "Hide outside under a tree."], 0, "Flooding is the reason to leave. Wind is the reason to hide inside."],
+       ["What is the safest room to hide from wind?", ["A small room in the middle with no windows", "A room with big windows", "The garage", "The porch"], 0, "No windows, middle of the house."],
+       ["How much water does each person need per day?", ["1 gallon", "1 cup", "1 small bottle", "None"], 0, "Plan 1 gallon per person, each day, for 3 days."]],
+  s6: [["After the storm, what should you do about floodwater?", ["Stay out of it", "Play in it", "Drive through it", "Drink it"], 0, "Floodwater can hide holes, germs, and electricity."],
+       ["Where should a generator go?", ["Outside, far from windows", "In the garage", "In the kitchen", "In a bedroom"], 0, "Generators make poison gas, so they stay outside."],
+       ["You feel scared after the storm. What is a good thing to do?", ["Talk to someone you trust", "Keep it all inside", "Watch scary news all day", "Stay alone"], 0, "Talking to someone helps."]],
+  s7: [["Hurricanes start over…", ["Warm ocean water", "Mountains", "Deserts", "Ice"], 0, "Warm ocean water."],
+       ["A storm becomes a hurricane when its wind reaches…", ["74 mph", "10 mph", "25 mph", "500 mph"], 0, "74 miles per hour."],
+       ["Which alert means “get ready, the storm might come”?", ["Watch", "Warning", "All clear", "Category"], 0, "Watch = wait and get ready."],
+       ["Leaders tell your area to evacuate. What does evacuate mean?", ["Leave and go somewhere safer", "Stay home", "Clean up", "Go to the beach"], 0, "Evacuate means leave to a safer place."],
+       ["You see a power line on the ground. What do you do?", ["Stay far away and tell an adult", "Move it with a stick", "Step over it", "Touch it to check"], 0, "Treat every fallen wire as dangerous."],
+       ["Which thing does NOT belong in a go-kit?", ["Video game system", "Water", "Flashlight", "Medicine"], 0, "No power means no games. Pack what keeps you safe."],
+       ["How long can it take to recover after a big hurricane?", ["Days, weeks, or even months", "One hour", "Exactly one day", "It is always fast"], 0, "Getting back to normal takes time."],
+       ["Who helps people after a hurricane?", ["Rescue workers, power crews, the Red Cross, and neighbors", "No one", "Only movie stars", "Only robots"], 0, "Many people work together to help."]]
+};
+(function quick(){
+  $$(".mc").forEach(box => {
+    const set = box.dataset.set, Q = MCQ[set]; if (!Q) return;
+    box.innerHTML = `<h4>✅ Quick check</h4>` + Q.map((q, i) => {
+      // shuffle options per question (stable) so the answer is not always first
+      const order = q[1].map((_, k) => k); const r = rng(set.length * 31 + i * 7 + 3); for (let k = order.length - 1; k > 0; k--) { const j = Math.floor(r() * (k + 1)); [order[k], order[j]] = [order[j], order[k]]; }
+      return `<div class="mcq-card" data-key="${set}-${i}"><p class="q"><span class="qn">${i + 1}</span>${q[0]}</p><div class="opts">${order.map(k => `<button type="button" data-k="${k}">${q[1][k]}</button>`).join("")}</div><div class="fbk" aria-live="polite"></div></div>`;
+    }).join("");
+    $$(".mcq-card", box).forEach(card => {
+      const key = card.dataset.key, i = +key.split("-")[1], q = Q[i];
+      const mark = (k, final) => { $$("button", card).forEach(b => { if (+b.dataset.k === q[2] && final) b.classList.add("right"); }); };
+      const saved = WORK.mc[key];
+      if (saved && saved.done) { mark(0, true); $$("button", card).forEach(b => b.disabled = true); $(".fbk", card).innerHTML = `<div class="feedback ok">✓ ${q[3]}</div>`; }
+      card.addEventListener("click", e => {
+        const b = e.target.closest("button"); if (!b || b.disabled) return;
+        const k = +b.dataset.k, ok = k === q[2];
+        const rec = WORK.mc[key] || { q: q[0], first: q[1][k], ok, tries: 0 };
+        rec.tries++; if (ok) rec.done = true; WORK.mc[key] = rec; saveWork();
+        if (ok) { b.classList.add("right"); $$("button", card).forEach(x => x.disabled = true); $(".fbk", card).innerHTML = `<div class="feedback ok">✓ Correct! ${q[3]}</div>`; }
+        else { b.classList.add("wrong"); b.disabled = true; $(".fbk", card).innerHTML = `<div class="feedback no">Not quite. Try again.</div>`; }
+      });
+    });
+  });
+})();
+
+/* ================= read aloud ================= */
+(function readAloud(){
+  if (!("speechSynthesis" in window)) return;
+  let cur = null;
+  const stop = () => { speechSynthesis.cancel(); if (cur) { cur.textContent = "🔊 Read to me"; cur.setAttribute("aria-pressed", "false"); cur = null; } };
+  const add = (host, getText, where = "prepend") => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "say"; b.textContent = "🔊 Read to me"; b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => {
+      if (cur === b) { stop(); return; } stop();
+      const u = new SpeechSynthesisUtterance(getText().replace(/[🌀👁️🌊⚠️🚨🚗🏠💧🔁✅✏️🔊📄👀📱🛒👂🖐️🔌💛]/gu, "").replace(/\s+/g, " ").trim());
+      u.rate = .9; u.lang = "en-US"; u.onend = () => { if (cur === b) stop(); };
+      cur = b; b.textContent = "⏹ Stop"; b.setAttribute("aria-pressed", "true"); speechSynthesis.speak(u);
+    });
+    where === "prepend" ? host.prepend(b) : host.append(b);
+  };
+  $$("main .prose").forEach(p => add(p, () => p.innerText.replace("🔊 Read to me", "").replace("⏹ Stop", "")));
+  $$(".alerts").forEach(a => { const d = document.createElement("div"); a.before(d); add(d, () => a.innerText, "append"); });
+  $$(".mcq-card").forEach(c => add($(".q", c), () => $(".q", c).innerText.replace(/^\d+/, "") + ". " + $$(".opts button", c).map(b => b.textContent).join(". Or, "), "append"));
+  $$(".qs li").forEach(li => add(li, () => li.firstChild.textContent, "append"));
+  $$(".sense").forEach(s => add(s, () => s.innerText, "append"));
+  $$(".callout[aria-live]").forEach(cn => { const host = cn.parentElement; const b = document.createElement("div"); host.insertBefore(b, cn); add(b, () => cn.innerText, "append"); });
+  window.addEventListener("pagehide", stop);
+})();
+
+/* ================= ANSWERS + REPORT (adapted) ================= */
+(function report(){
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const SECS = [
+    ["s1", "Part 1: What is a hurricane?"], ["s2", "Part 2: What will I see and feel?"], ["s3", "Part 3: Watch or warning?"],
+    ["s4", "Part 4: Get ready and stay safe"], ["s5", "Part 5: Make the right choice"], ["s6", "Part 6: After the storm"], ["s7", "Part 7: Check what you know"]
+  ];
+  const MIN = 8;
+
+  /* ---- answer boxes with sentence starters ---- */
+  $$(".qs").forEach(qs => {
+    const sec = qs.closest("section").id;
+    $$("ol > li", qs).forEach((li, i) => {
+      const key = `${sec}-q${i + 1}`, label = li.firstChild.textContent.trim(), start = li.dataset.start || "";
+      const ta = document.createElement("textarea");
+      Object.assign(ta, { id: "ans-" + key, placeholder: start ? "Example start: " + start : "Type your answer…" });
+      ta.dataset.q = key; ta.dataset.sec = sec; ta.dataset.label = label; ta.setAttribute("aria-label", label);
+      li.appendChild(ta);
+      if (start) { const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost sm starter"; b.textContent = "✏️ Help me start";
+        b.onclick = () => { if (!ta.value.trim()) { ta.value = start.replace(/…$/, "").trim() + " "; ta.dispatchEvent(new Event("input")); } ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); };
+        li.appendChild(b); }
+    });
+    const st = document.createElement("span"); st.className = "qstat"; qs.querySelector("h4").appendChild(st);
+  });
+  const fields = $$("textarea[data-q]");
+  fields.forEach(ta => {
+    ta.value = WORK.a[ta.dataset.q] || "";
+    const grow = () => { ta.style.height = "auto"; ta.style.height = Math.max(90, ta.scrollHeight + 2) + "px"; };
+    ta.addEventListener("input", () => { WORK.a[ta.dataset.q] = ta.value; grow(); saveWork(); });
+    requestAnimationFrame(grow);
+  });
+  const nm = $("#stuName"), pr = $("#stuPer"), own = $("#ownWords");
+  nm.value = WORK.name || ""; pr.value = WORK.period || ""; own.checked = !!WORK.own;
+  nm.addEventListener("input", () => { WORK.name = nm.value; saveWork(); });
+  pr.addEventListener("input", () => { WORK.period = pr.value; saveWork(); });
+  own.addEventListener("change", () => { WORK.own = own.checked; saveWork(); });
+
+  const done = ta => (WORK.a[ta.dataset.q] || "").replace(/^(Example start: )/, "").trim().length >= MIN;
+  const secFields = id => fields.filter(f => f.dataset.sec === id);
+  const mcOf = id => (MCQ[id] || []).map((q, i) => ({ q: q[0], answer: q[1][q[2]], rec: WORK.mc[id + "-" + i] }));
+  const mcDone = id => mcOf(id).every(m => m.rec && m.rec.done);
+
+  /* ---- checklist ---- */
+  const tasks = () => [
+    [!!(WORK.name || "").trim() && !!(WORK.period || "").trim(), "Name and class period at the top"],
+    [WORK.grow.length > 0 && mcDone("s1") && secFields("s1").every(done), "Part 1: grew a storm, quick check, and writing"],
+    [!!WORK.mc["s2-0"] && mcDone("s2") && secFields("s2").every(done), "Part 2: quick check and writing"],
+    [!!WORK.sort && mcDone("s3"), "Part 3: watch or warning sort and quick check"],
+    [!!(WORK.room && WORK.room.found) && WORK.kit.length > 0 && mcDone("s4") && secFields("s4").every(done), "Part 4: safe room, go-kit, quick check, and writing"],
+    [!!WORK.story, "Part 5: finished the choices"],
+    [!!WORK.feel && WORK.plan.length === 3 && mcDone("s6") && secFields("s6").every(done), "Part 6: feelings, recovery plan, quick check, and writing"],
+    [mcDone("s7") && secFields("s7").every(done), "Part 7: final check and writing"]
+  ];
+  function status(){
+    const T = tasks(), n = T.filter(t => t[0]).length;
+    $("#ansCount").textContent = `✅ ${n} / ${T.length} done`;
+    $$(".qs").forEach(qs => { const fs = $$("textarea[data-q]", qs), d = fs.filter(done).length; const st = $(".qstat", qs); st.textContent = `${d} of ${fs.length} written`; st.classList.toggle("all", d === fs.length); });
+    $("#selfcheck").innerHTML = T.map(([ok, t]) => `<li class="${ok ? "ok" : ""}"><span class="tick" aria-hidden="true">${ok ? "✓" : ""}</span>${t}<span class="sr">${ok ? " (done)" : " (not yet)"}</span></li>`).join("");
+  }
+
+  /* ---- report content as blocks (used for preview and PDF) ---- */
+  function blocks(){
+    const out = [];
+    const H = t => out.push({ t: "h", v: t }), L = t => out.push({ t: "l", v: t }), A = v => out.push({ t: "a", v }), TB = (cols, rows) => out.push({ t: "tb", cols, rows });
+    const mcs = id => { const m = mcOf(id); if (!m.length) return; L("Quick check");
+      TB([["Question", 3], ["Correct answer", 2], ["First try", 1.1]], m.map(x => [x.q, x.answer, !x.rec ? "Not answered" : x.rec.ok ? "Correct" : "Missed (tries: " + x.rec.tries + ")"])); };
+    const writes = id => secFields(id).forEach(f => { L(f.dataset.label); A((WORK.a[f.dataset.q] || "").trim()); });
+    SECS.forEach(([id, title]) => {
+      H(title);
+      if (id === "s1") { L("Grow a storm"); A(WORK.grow.length ? WORK.grow.map((g, i) => `${i + 1}. ${g.water} water: reached ${g.mph} mph, became a ${g.result}`).join("\n") : ""); }
+      if (id === "s3") { L("Watch or warning sort"); A(WORK.sort ? `${WORK.sort.right} of ${WORK.sort.of} right on the first try` : ""); }
+      if (id === "s4") {
+        L("Find the safe room"); A(WORK.room ? `First pick: ${WORK.room.first} (${WORK.room.ok ? "safe" : "not safe"})${WORK.room.found ? ". Found a safe room." : ""}` : "");
+        const k = WORK.kitScore; L(`Go-kit (${WORK.kit.length} of 16 spaces)`); A(WORK.kit.length ? WORK.kit.join(", ") + (k ? `\n${k.good} of ${k.total} must-haves, ${k.meh} not needed, ${k.bad} dangerous` : "") : "");
+      }
+      if (id === "s5") { const s = WORK.story; L("Choices"); A(s ? `${s.score % 1 ? s.score.toFixed(1) : s.score} of ${s.of} safe choices\n` + s.picks.join("\n") : ""); }
+      if (id === "s6") {
+        L("Things that help feelings"); A(WORK.feel ? `Found ${WORK.feel.good} of ${WORK.feel.total} helpful things` + (WORK.feel.bad ? `, plus ${WORK.feel.bad} that don’t help` : "") : "");
+        L("My recovery plan"); A(WORK.plan.length ? WORK.plan.map((p, i) => `${i + 1}. ${p}`).join("\n") : "");
+      }
+      mcs(id); writes(id);
+    });
+    return out;
+  }
+  function htmlReport(){
+    const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+    const T = tasks();
+    let h = `<header class="rp-head"><p class="rp-kicker">Dangerous Earth · Unit 3 · Day 20</p><h2>Hurricane Safety report</h2><p><strong>${esc(WORK.name) || "<em>No name yet</em>"}</strong> · Period ${esc(WORK.period) || "—"} · ${date}</p><p>${T.filter(t => t[0]).length} of ${T.length} checklist items done · Did my own work: ${WORK.own ? "✓ yes" : "not checked"}</p></header>`;
+    let open = false;
+    blocks().forEach(b => {
+      if (b.t === "h") { if (open) h += "</section>"; h += `<section class="rp-sec"><h3>${esc(b.v)}</h3>`; open = true; }
+      else if (b.t === "l") h += `<p class="rp-ql">${esc(b.v)}</p>`;
+      else if (b.t === "a") h += `<p class="rp-a ${b.v ? "" : "empty"}">${b.v ? esc(b.v).replace(/\n/g, "<br>") : "Not done yet"}</p>`;
+      else h += `<table><thead><tr>${b.cols.map(c => `<th>${esc(c[0])}</th>`).join("")}</tr></thead><tbody>${b.rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    });
+    return h + (open ? "</section>" : "");
+  }
+  let rt = null;
+  function refresh(){ status(); clearTimeout(rt); rt = setTimeout(() => { $("#reportPreview").innerHTML = htmlReport(); }, 400); }
+  document.addEventListener("workchange", refresh);
+  refresh();
+
+  /* ---- PDF ---- */
+  const msg = s => { $("#repMsg").textContent = s; };
+  let dl = null;
+  (async () => { try { if (window.claude && typeof window.claude.use === "function") dl = await window.claude.use("downloads"); } catch (e) { dl = null; } })();
+  const clean = s => String(s ?? "").replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, "-").replace(/…/g, "...")
+    .replace(/→/g, "->").replace(/✓/g, "[x]").replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF]/g, "").replace(/[ \t]+\n/g, "\n");
+  function makePDF(){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "letter" });
+    const PW = doc.internal.pageSize.getWidth(), PH = doc.internal.pageSize.getHeight(), M = 54, CW = PW - M * 2, BOT = PH - 50;
+    let y = M;
+    const INK = [14, 36, 51], MUTED = [90, 110, 125], ACC = [11, 110, 153], RED = [180, 40, 35];
+    const need = h => { if (y + h > BOT) { doc.addPage(); y = M; } };
+    const para = (txt, o = {}) => {
+      const size = o.size || 12, lh = size * 1.4;
+      doc.setFont("helvetica", o.bold ? "bold" : o.italic ? "italic" : "normal"); doc.setFontSize(size); doc.setTextColor(...(o.color || INK));
+      doc.splitTextToSize(clean(txt), CW - (o.pad || 0) * 2).forEach(line => {
+        need(lh);
+        if (o.bg) { doc.setFillColor(...o.bg); doc.rect(M, y - 2, CW, lh, "F"); }
+        if (o.bar) { doc.setFillColor(...o.bar); doc.rect(M, y - 2, 3, lh, "F"); }
+        doc.text(line, M + (o.pad || 0), y + size * .95); y += lh;
+      });
+      y += o.after ?? 4;
+    };
+    const table = (cols, rows) => {
+      const total = cols.reduce((a, c) => a + c[1], 0), ws = cols.map(c => c[1] / total * CW), size = 10, lh = size * 1.3;
+      const row = (cells, head) => {
+        doc.setFont("helvetica", head ? "bold" : "normal"); doc.setFontSize(size);
+        const wrapped = cells.map((c, i) => doc.splitTextToSize(clean(c), ws[i] - 8));
+        const h = Math.max(...wrapped.map(w => w.length)) * lh + 8; need(h);
+        let x = M; wrapped.forEach((w, i) => {
+          if (head) { doc.setFillColor(226, 236, 243); doc.rect(x, y, ws[i], h, "F"); }
+          const missed = !head && i === cells.length - 1 && /Missed|Not answered/.test(cells[i]);
+          doc.setDrawColor(190, 205, 216); doc.setLineWidth(.6); doc.rect(x, y, ws[i], h);
+          doc.setTextColor(...(missed ? RED : INK)); w.forEach((ln, k) => doc.text(ln, x + 4, y + 4 + size * .95 + k * lh)); x += ws[i]; });
+        y += h;
+      };
+      row(cols.map(c => c[0]), true); rows.forEach(r => row(r)); y += 10;
+    };
+    const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+    const T = tasks();
+    para("Dangerous Earth - Unit 3 - Day 20", { size: 10, color: MUTED, after: 0 });
+    para("Hurricane Safety Report", { size: 22, bold: true, after: 6 });
+    para(`Name: ${WORK.name || "(no name)"}     Period: ${WORK.period || "-"}     Date: ${date}`, { size: 12, bold: true, after: 2 });
+    para(`${T.filter(t => t[0]).length} of ${T.length} checklist items done.   Did my own work: ${WORK.own ? "yes" : "NOT checked"}`, { size: 10.5, color: MUTED, after: 8 });
+    blocks().forEach(b => {
+      if (b.t === "h") { need(90); y += 10; para(b.v, { size: 15, bold: true, color: ACC, after: 2 }); doc.setDrawColor(...ACC); doc.setLineWidth(1.5); doc.line(M, y, M + CW, y); y += 10; }
+      else if (b.t === "l") para(b.v, { size: 11, bold: true, after: 3 });
+      else if (b.t === "a") b.v ? para(b.v, { bg: [238, 243, 247], bar: ACC, pad: 10, after: 10 }) : para("Not done yet", { bg: [251, 227, 225], bar: RED, pad: 10, italic: true, color: RED, after: 10 });
+      else table(b.cols, b.rows);
+    });
+    const n = doc.getNumberOfPages();
+    for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...MUTED);
+      doc.text(clean(`Hurricane Safety report - ${WORK.name || "no name"}`), M, PH - 28); doc.text(`Page ${i} of ${n}`, PW - M, PH - 28, { align: "right" }); }
+    return doc;
+  }
+  $("#repDownload").addEventListener("click", async () => {
+    if (!window.jspdf) { msg("The PDF maker did not load. Check the internet and reload the page. Your work is still saved."); return; }
+    if (!(WORK.name || "").trim()) { msg("Type your name at the top of the page first."); $("#stuName").focus(); return; }
+    const btn = $("#repDownload"); btn.disabled = true;
+    try {
+      const doc = makePDF(), fname = "Hurricane-Safety-" + (WORK.name.trim().replace(/[^A-Za-z0-9]+/g, "-") || "report") + ".pdf";
+      if (dl) {
+        try { await dl.save({ filename: fname, data: new Blob([doc.output("arraybuffer")], { type: "application/pdf" }) }); msg("Saved! Now upload the PDF to the Day 20 assignment on Canvas."); }
+        catch (e) { msg(e && e.code === "declined" ? "Download canceled. Click the button again when you are ready." : e && e.code === "rate_limited" ? "A save box is already open. Finish that one first." : "Saving is not working here. Ask your teacher for help. Your work is still saved."); }
+      } else { doc.save(fname); msg("Downloaded! Now upload the PDF to the Day 20 assignment on Canvas."); }
+    } catch (e) { console.error(e); msg("Something went wrong. Reload the page and try again. Your work is still saved."); }
+    btn.disabled = false;
+  });
+  $("#wipeAll").addEventListener("click", () => {
+    if (!confirm("Erase all your work on this computer? You can’t undo this.")) return;
+    Object.assign(WORK, { name: "", period: "", a: {}, trials: [], kit: [], kitScore: null, story: null, own: false, mc: {}, grow: [], sort: null, room: null, feel: null, plan: [] }); store("work", WORK);
+    try { location.reload(); } catch (e) { msg("Erased. Reload the page to start fresh."); }
+  });
+})();
+
+</script>
+</body>
+</html>
